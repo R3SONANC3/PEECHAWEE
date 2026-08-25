@@ -84,7 +84,9 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToColor }) {
             <div className="team-head">
               <div>
                 <div>{team.name}</div>
-                {team.average !== null && <div className="team-avg">เฉลี่ย {formatNum(team.average)}</div>}
+                {team.total !== null && (
+                  <div className="team-avg">รวม {formatNum(team.total)} · เฉลี่ย {formatNum(team.average)}</div>
+                )}
               </div>
               <span className="team-size">{team.members.length}/{team.slotCount}</span>
             </div>
