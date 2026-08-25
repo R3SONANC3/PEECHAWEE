@@ -54,6 +54,13 @@ npm run dev
    - `GOOGLE_PRIVATE_KEY` (ใส่ทั้งก้อนพร้อม `\n` เหมือนใน `.env.local`)
 4. กด **Deploy** — ครั้งต่อไปที่ push ขึ้น `main`, Vercel จะ deploy ให้อัตโนมัติ
 
+## Credits
+
+ไอคอนคลาสใน `components/ClassIcon.js` มาจาก [game-icons.net](https://game-icons.net) ลิขสิทธิ์ CC BY 4.0:
+
+- Broadsword, Pointy Hat, Archery Target, Daggers, Crossed Pistols, Paw Print, Fist, Flame Spin, Battle Axe — โดย **Lorc**
+- Crucifix, Blacksmith, Cross Shield, Laurels Trophy, Harp — โดย **Delapouite**
+
 ## โครงสร้างโค้ด
 
 - `lib/googleSheets.js` — auth + wrapper เรียก Google Sheets API (แทน `Code.gs` เดิม)
