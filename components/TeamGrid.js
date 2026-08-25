@@ -2,6 +2,8 @@
 import { useMemo, useState } from 'react';
 import { useConfirm } from './useConfirm';
 import { useToast } from './useToast';
+import ClassIcon from './ClassIcon';
+import { CLASS_MAP } from '@/lib/classes';
 
 function formatNum(n) {
   if (n === null || n === undefined || Number.isNaN(n)) return '';
@@ -19,7 +21,7 @@ async function callApi(body) {
   return data.teams;
 }
 
-export default function TeamGrid({ sheetTitle, initialTeams, nameToColor }) {
+export default function TeamGrid({ sheetTitle, initialTeams, nameToClass }) {
   const [teams, setTeams] = useState(initialTeams || []);
   const [editing, setEditing] = useState(null); // { team, slot, name, gear }
   const [nameQuery, setNameQuery] = useState('');
@@ -28,7 +30,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToColor }) {
   const { confirm, modal } = useConfirm();
   const { toast, toastUI } = useToast();
 
-  const names = useMemo(() => Object.keys(nameToColor || {}), [nameToColor]);
+  const names = useMemo(() => Object.keys(nameToClass || {}), [nameToClass]);
 
   // Group teams by their sheet section (e.g. TOP/MID/BOT), preserving the
   // order they already come in from the server. Sheets with no section
@@ -119,9 +121,15 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToColor }) {
                     return (
                       <li className={`team-member${m ? '' : ' empty'}`} key={slot}>
                         <span className="slot-num">{slot}</span>
-                        <span className="member-label" style={m && nameToColor[m.name] ? { color: nameToColor[m.name] } : undefined}>
-                          {m ? m.name : 'ว่าง'}
-                        </span>
+                        {(() => {
+                          const cls = m && CLASS_MAP[nameToClass[m.name]];
+                          return (
+                            <span className="member-label" style={cls ? { color: cls.color } : undefined}>
+                              {cls && <ClassIcon icon={cls.icon} size={14} className="member-icon" />}
+                              <span className="member-name-text">{m ? m.name : 'ว่าง'}</span>
+                            </span>
+                          );
+                        })()}
                         {m && m.gear !== null && <span className="gear">{formatNum(m.gear)}</span>}
                         <span className="slot-actions">
                           <button type="button" className="icon-btn" onClick={() => openEdit(team.name, slot, m)} title={m ? 'แก้ไข' : 'เพิ่มชื่อ'}>✎</button>

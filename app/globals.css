@@ -77,7 +77,10 @@ button { font-family: inherit; }
 .stat-total { grid-column: 1 / -1; font-size: 15px; color: var(--text); margin-bottom: 4px; }
 .stat-total b { font-size: 22px; color: var(--accent); }
 .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-icon {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
 .legend-name { color: var(--text); font-weight: 500; }
 .legend-th { color: var(--text-faint); font-size: 12px; }
 .legend-count { margin-left: auto; color: var(--text-dim); font-variant-numeric: tabular-nums; }
@@ -120,7 +123,10 @@ button { font-family: inherit; }
   overflow: hidden; box-shadow: var(--shadow);
 }
 .class-head { padding: 13px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-soft); }
-.class-swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.class-icon {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
 .class-names { display: flex; flex-direction: column; line-height: 1.25; }
 .class-en { font-family: var(--font-serif), serif; font-weight: 600; font-size: 14.5px; color: var(--text); }
 .class-th { font-size: 11px; color: var(--text-faint); }
@@ -130,7 +136,9 @@ button { font-family: inherit; }
 
 .member-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; font-size: 13.5px; color: var(--text); }
 .member-row:hover { background: var(--border-soft); }
-.member-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.member-name { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-weight: 500; }
+.member-icon { flex-shrink: 0; opacity: 0.85; }
+.member-name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-actions { display: flex; gap: 4px; opacity: .5; }
 .member-row:hover .row-actions { opacity: 1; }
 .icon-btn {
@@ -168,7 +176,7 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
 .team-members { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
 .team-member { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; font-size: 13.5px; color: var(--text); }
 .team-member:hover { background: var(--border-soft); }
-.member-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.member-label { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-weight: 500; }
 .team-member.empty .member-label { color: var(--text-faint); font-style: italic; font-weight: 400; }
 .team-member .gear { font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 .slot-actions { display: flex; gap: 4px; margin-left: auto; flex-shrink: 0; opacity: .55; }

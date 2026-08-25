@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useConfirm } from './useConfirm';
 import { useToast } from './useToast';
+import ClassIcon from './ClassIcon';
 
 async function callApi(body) {
   const res = await fetch('/api/roster', {
@@ -117,7 +118,9 @@ export default function RosterBoard({ initialRoster, classes }) {
           <div className="stat-total"><b>{total}</b> สมาชิกทั้งหมด</div>
           {classes.map((c) => (
             <div key={c.key} className="legend-item">
-              <span className="legend-dot" style={{ background: c.color }} />
+              <span className="legend-icon" style={{ background: c.color }}>
+                <ClassIcon icon={c.icon} size={13} />
+              </span>
               <span className="legend-name">{c.key}</span>
               <span className="legend-th">{c.th}</span>
               <span className="legend-count">{counts[c.key]}</span>
@@ -164,7 +167,9 @@ export default function RosterBoard({ initialRoster, classes }) {
           return (
             <div className="class-card" key={c.key}>
               <div className="class-head">
-                <span className="class-swatch" style={{ background: c.color }} />
+                <span className="class-icon" style={{ background: c.color }}>
+                  <ClassIcon icon={c.icon} size={16} />
+                </span>
                 <div className="class-names">
                   <span className="class-en">{c.key}</span>
                   <span className="class-th">{c.th}</span>
@@ -189,7 +194,10 @@ export default function RosterBoard({ initialRoster, classes }) {
                   }
                   return (
                     <li className="member-row" key={m}>
-                      <span className="member-name" style={{ color: c.color }}>{m}</span>
+                      <span className="member-name" style={{ color: c.color }}>
+                        <ClassIcon icon={c.icon} size={14} className="member-icon" />
+                        <span className="member-name-text">{m}</span>
+                      </span>
                       <span className="row-actions">
                         <button type="button" className="icon-btn" onClick={() => startEdit(c.key, m)} title="แก้ไข">✎</button>
                         <button type="button" className="icon-btn del" onClick={() => handleDelete(c.key, m)} title="ลบ">✕</button>
