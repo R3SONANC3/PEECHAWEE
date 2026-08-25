@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { useConfirm } from './useConfirm';
+import { useToast } from './useToast';
 
 function inputValueToLabel(v) {
   const [y, m, d] = v.split('-').map(Number);
@@ -26,6 +27,7 @@ export default function AttendanceBoard({ initialData, today }) {
   const [note, setNote] = useState(`กำลังดูวันที่ ${initialData.date || today}`);
   const [error, setError] = useState('');
   const { confirm, modal } = useConfirm();
+  const { toast, toastUI } = useToast();
 
   const isDirty = JSON.stringify(statuses) !== JSON.stringify(savedSnapshot);
 
@@ -108,6 +110,7 @@ export default function AttendanceBoard({ initialData, today }) {
       setStatuses(data.attendance);
       setSavedSnapshot(data.attendance);
       setNote(`บันทึกวันที่ ${currentDate} เรียบร้อย`);
+      toast('บันทึกการเช็คชื่อแล้ว');
     } catch (e) {
       setError('บันทึกไม่สำเร็จ: ' + e.message);
     } finally {
@@ -118,6 +121,7 @@ export default function AttendanceBoard({ initialData, today }) {
   return (
     <>
       {modal}
+      {toastUI}
 
       <div className="date-panel">
         <label htmlFor="dateInput">วันที่</label>

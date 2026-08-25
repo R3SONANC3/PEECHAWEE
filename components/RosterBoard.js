@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { useConfirm } from './useConfirm';
+import { useToast } from './useToast';
 
 async function callApi(body) {
   const res = await fetch('/api/roster', {
@@ -24,6 +25,7 @@ export default function RosterBoard({ initialRoster, classes }) {
   const [editName, setEditName] = useState('');
   const [editCls, setEditCls] = useState('');
   const { confirm, modal } = useConfirm();
+  const { toast, toastUI } = useToast();
 
   const counts = useMemo(() => {
     const c = {};
@@ -42,6 +44,7 @@ export default function RosterBoard({ initialRoster, classes }) {
       const updated = await callApi({ action: 'add', name: trimmed, cls });
       setRoster(updated);
       setName('');
+      toast(`เพิ่ม "${trimmed}" แล้ว`);
     } catch (err) {
       setFormMsg('เพิ่มไม่สำเร็จ: ' + err.message);
     } finally {
@@ -61,6 +64,7 @@ export default function RosterBoard({ initialRoster, classes }) {
     try {
       const updated = await callApi({ action: 'delete', name: memberName, cls: clsKey });
       setRoster(updated);
+      toast(`ลบ "${memberName}" แล้ว`);
     } finally {
       setBusy(false);
     }
@@ -87,6 +91,7 @@ export default function RosterBoard({ initialRoster, classes }) {
       });
       setRoster(updated);
       setEditing(null);
+      toast('บันทึกการแก้ไขแล้ว');
     } finally {
       setBusy(false);
     }
@@ -97,6 +102,7 @@ export default function RosterBoard({ initialRoster, classes }) {
   return (
     <>
       {modal}
+      {toastUI}
 
       <section className="stat-panel">
         <div className="stat-bar">

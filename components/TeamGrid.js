@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { useConfirm } from './useConfirm';
+import { useToast } from './useToast';
 
 function formatNum(n) {
   if (n === null || n === undefined || Number.isNaN(n)) return '';
@@ -25,6 +26,7 @@ export default function TeamGrid({ sheetType, initialTeams, nameToColor, layout 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const { confirm, modal } = useConfirm();
+  const { toast, toastUI } = useToast();
 
   const names = useMemo(() => Object.keys(nameToColor || {}), [nameToColor]);
   const matches = nameQuery.trim()
@@ -45,6 +47,7 @@ export default function TeamGrid({ sheetType, initialTeams, nameToColor, layout 
       const updated = await callApi({ sheet: sheetType, team: editing.team, slot: editing.slot, name: editing.name, gear: editing.gear });
       setTeams(updated);
       setEditing(null);
+      toast('บันทึกแล้ว');
     } catch (e) {
       setError('บันทึกไม่สำเร็จ: ' + e.message);
     } finally {
@@ -64,6 +67,7 @@ export default function TeamGrid({ sheetType, initialTeams, nameToColor, layout 
     try {
       const updated = await callApi({ sheet: sheetType, team, slot, name: '', gear: '' });
       setTeams(updated);
+      toast(`ลบ "${memberName}" ออกจากทีมแล้ว`);
     } finally {
       setBusy(false);
     }
@@ -72,6 +76,7 @@ export default function TeamGrid({ sheetType, initialTeams, nameToColor, layout 
   return (
     <>
       {modal}
+      {toastUI}
 
       <div className={`team-grid team-grid-${layout}`}>
         {teams.map((team) => (
