@@ -1,6 +1,7 @@
 import { Noto_Sans_Thai, Noto_Serif_Thai } from 'next/font/google';
 import './globals.css';
 import Nav from '@/components/Nav';
+import { listTeamSheetTitles } from '@/lib/teams';
 
 const notoSans = Noto_Sans_Thai({
   variable: '--font-sans',
@@ -15,15 +16,27 @@ const notoSerif = Noto_Serif_Thai({
 
 export const metadata = {
   title: 'ทำเนียบสมาชิกกิลผีชีวะ',
-  description: 'จัดการรายชื่อสมาชิก เช็คชื่อ และทีม War/Polarity ของกิลผีชีวะ',
+  description: 'จัดการรายชื่อสมาชิก เช็คชื่อ และทีมต่าง ๆ ของกิลผีชีวะ',
 };
 
-export default function RootLayout({ children }) {
+// Nav lists team tabs discovered from the live sheet, so this must never be
+// cached/prerendered — otherwise a newly added team tab wouldn't show up
+// until the next build.
+export const dynamic = 'force-dynamic';
+
+export default async function RootLayout({ children }) {
+  let teamSheets = [];
+  try {
+    teamSheets = await listTeamSheetTitles();
+  } catch (e) {
+    teamSheets = [];
+  }
+
   return (
     <html lang="th" className={`${notoSans.variable} ${notoSerif.variable}`}>
       <body>
         <div className="wrap">
-          <Nav />
+          <Nav teamSheets={teamSheets} />
           {children}
         </div>
       </body>

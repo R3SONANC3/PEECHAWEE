@@ -3,7 +3,8 @@ import { readTeams, updateTeamSlot } from '@/lib/teams';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const sheet = (searchParams.get('sheet') || 'war').toLowerCase();
+  const sheet = searchParams.get('sheet') || '';
+  if (!sheet) return NextResponse.json({ ok: false, error: 'missing sheet' }, { status: 400 });
   try {
     const teams = await readTeams(sheet);
     return NextResponse.json({ ok: true, teams });

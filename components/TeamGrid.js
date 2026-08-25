@@ -19,7 +19,7 @@ async function callApi(body) {
   return data.teams;
 }
 
-export default function TeamGrid({ sheetType, initialTeams, nameToColor, layout }) {
+export default function TeamGrid({ sheetTitle, initialTeams, nameToColor }) {
   const [teams, setTeams] = useState(initialTeams || []);
   const [editing, setEditing] = useState(null); // { team, slot, name, gear }
   const [nameQuery, setNameQuery] = useState('');
@@ -44,7 +44,7 @@ export default function TeamGrid({ sheetType, initialTeams, nameToColor, layout 
     setBusy(true);
     setError('');
     try {
-      const updated = await callApi({ sheet: sheetType, team: editing.team, slot: editing.slot, name: editing.name, gear: editing.gear });
+      const updated = await callApi({ sheet: sheetTitle, team: editing.team, slot: editing.slot, name: editing.name, gear: editing.gear });
       setTeams(updated);
       setEditing(null);
       toast('บันทึกแล้ว');
@@ -65,7 +65,7 @@ export default function TeamGrid({ sheetType, initialTeams, nameToColor, layout 
     if (!ok) return;
     setBusy(true);
     try {
-      const updated = await callApi({ sheet: sheetType, team, slot, name: '', gear: '' });
+      const updated = await callApi({ sheet: sheetTitle, team, slot, name: '', gear: '' });
       setTeams(updated);
       toast(`ลบ "${memberName}" ออกจากทีมแล้ว`);
     } finally {
@@ -78,7 +78,7 @@ export default function TeamGrid({ sheetType, initialTeams, nameToColor, layout 
       {modal}
       {toastUI}
 
-      <div className={`team-grid team-grid-${layout}`}>
+      <div className="team-grid">
         {teams.map((team) => (
           <div className="team-card" key={team.name}>
             <div className="team-head">
@@ -86,12 +86,12 @@ export default function TeamGrid({ sheetType, initialTeams, nameToColor, layout 
                 <div>{team.name}</div>
                 {team.average !== null && <div className="team-avg">เฉลี่ย {formatNum(team.average)}</div>}
               </div>
-              <span className="team-size">{team.members.length}/5</span>
+              <span className="team-size">{team.members.length}/{team.slotCount}</span>
             </div>
             <ul className="team-members">
-              {Array.from({ length: 5 }, (_, i) => {
-                const m = team.members[i];
+              {Array.from({ length: team.slotCount }, (_, i) => {
                 const slot = i + 1;
+                const m = team.members.find((mm) => mm.slot === slot);
                 return (
                   <li className={`team-member${m ? '' : ' empty'}`} key={slot}>
                     <span className="slot-num">{slot}</span>
