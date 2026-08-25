@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 const BASE_LINKS = [
   { href: '/', label: '🏰 ทำเนียบสมาชิก' },
   { href: '/attendance', label: '📋 เช็คชื่อ' },
+  { href: '/duplicates', label: '🔁 ชื่อซ้ำ' },
 ];
 
 export default function Nav({ teamSheets = [] }) {

@@ -186,6 +186,17 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
   font-size: 11.5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 
+/* ---------- Duplicate name check ---------- */
+.dup-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.dup-item {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 18px; box-shadow: var(--shadow);
+}
+.dup-name { font-weight: 600; font-size: 15px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.dup-flag { font-size: 11.5px; font-weight: 500; color: var(--danger); background: var(--danger-soft); padding: 2px 9px; border-radius: 20px; }
+.dup-spots { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.dup-spots li { font-size: 13px; color: var(--text-dim); }
+
 /* ---------- Attendance: date panel ---------- */
 .date-panel {
   background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
