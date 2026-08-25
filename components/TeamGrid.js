@@ -102,7 +102,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToClass }) {
       {sections.map((sectionGroup) => (
         <div className="team-section" key={sectionGroup.label || '_'}>
           {sectionGroup.label && <h2 className="section-title">{sectionGroup.label}</h2>}
-          <div className="team-grid" style={{ gridTemplateColumns: `repeat(${sectionGroup.teams.length}, minmax(220px, 1fr))` }}>
+          <div className="team-grid">
             {sectionGroup.teams.map((team) => (
               <div className="team-card" key={team.name}>
                 <div className="team-head">
