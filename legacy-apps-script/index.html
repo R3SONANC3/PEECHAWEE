@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ทำเนียบสมาชิกกิลผีชีวะ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">กำลังปลุกวิญญาณข้อมูล...</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-message" id="modalMessage"></div>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn modal-btn-cancel" id="modalCancel">ยกเลิก</button>
+      <button type="button" class="modal-btn modal-btn-confirm" id="modalConfirm">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <svg class="crest" viewBox="0 0 48 48" fill="none">
+      <path d="M24 3 L41 12 V26 C41 36 33 43 24 45 C15 43 7 36 7 26 V12 Z" stroke="#7fe3b4" stroke-width="2" fill="rgba(127,227,180,0.06)"/>
+      <path d="M24 12 L24 30 M17 20 L31 20" stroke="#7fe3b4" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <h1>ทำเนียบสมาชิกกิลผีชีวะ</h1>
+    <div class="subtitle">จัดการรายชื่อสมาชิก · เพิ่ม แก้ไข และลบข้อมูลตามคลาส</div>
+  </header>
+
+  <nav class="nav">
+    <a href="index.html" class="active">🏰 ทำเนียบสมาชิก</a>
+    <a href="attendance.html">📋 เช็คชื่อ</a>
+    <a href="war.html">⚔️ War</a>
+    <a href="polarity.html">🔮 Polarity</a>
+  </nav>
+
+  <div class="sync-panel">
+    <div class="sync-row">
+      <span class="sync-dot off" id="syncDot"></span>
+      <span class="sync-status" id="syncStatus">ยังไม่ได้เชื่อมต่อกับ Google Sheet — ใช้ข้อมูลในเบราว์เซอร์นี้</span>
+      <span class="sync-actions">
+        <button class="sync-btn" id="toggleHelpBtn">วิธีตั้งค่า</button>
+        <button class="sync-btn" id="editUrlBtn">เชื่อมต่อ / แก้ไข URL</button>
+        <button class="sync-btn" id="refreshBtn" style="display:none;">รีเฟรชจากชีต</button>
+      </span>
+    </div>
+    <form class="sync-form" id="urlForm" style="display:none;">
+      <input type="url" id="urlInput" placeholder="วาง Web app URL ของ Apps Script ที่นี่ (ลงท้าย /exec)" autocomplete="off">
+      <button type="submit" class="sync-btn" style="border-color:var(--accent);color:var(--accent-glow);">บันทึก</button>
+    </form>
+    <div class="sync-error" id="syncError"></div>
+    <div class="sync-help" id="syncHelp">
+      ให้เว็บนี้อ่าน/เขียนข้อมูลกลับเข้าชีตจริงได้ ต้อง deploy สคริปต์เป็น Web App ก่อน:
+      <ol>
+        <li>เปิดชีต -> เมนู <code>Extensions &gt; Apps Script</code></li>
+        <li>วางโค้ดจากไฟล์ <code>Code.gs</code> ที่แนบให้ (ลบโค้ดเดิมออกก่อน) แล้วกด Save</li>
+        <li><code>Deploy &gt; New deployment</code> เลือกประเภท <code>Web app</code></li>
+        <li>ตั้งค่า Execute as: <code>Me</code>, Who has access: <code>Anyone</code></li>
+        <li>กด Deploy แล้ว Authorize สิทธิ์ที่ขอ</li>
+        <li>คัดลอก Web app URL (ลงท้าย <code>/exec</code>) มาวางที่ช่อง "เชื่อมต่อ / แก้ไข URL" ด้านบน</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="seal-box">
+      <svg viewBox="0 0 200 200" class="seal-ring">
+        <circle cx="100" cy="100" r="80" fill="none" stroke="#1a2a24" stroke-width="26"/>
+        <g id="segments"></g>
+      </svg>
+      <div class="seal-center">
+        <div class="seal-total" id="totalCount">0</div>
+        <div class="seal-label">สมาชิกทั้งหมด</div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="panel-title">เพิ่มสมาชิกใหม่</div>
+  <form class="add-form" id="addForm">
+    <div class="field">
+      <label for="nameInput">ชื่อผู้เล่น</label>
+      <input id="nameInput" type="text" placeholder="เช่น Kotoha" autocomplete="off" required>
+    </div>
+    <div class="field">
+      <label for="classInput">คลาส</label>
+      <select id="classInput"></select>
+    </div>
+    <button type="submit" class="btn btn-add">+ เพิ่มสมาชิก</button>
+    <div class="form-msg" id="formMsg"></div>
+  </form>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="ค้นหาชื่อผู้เล่น..." autocomplete="off">
+      <div class="search-suggestions" id="searchSuggestions" hidden></div>
+    </div>
+    <button class="clear-all" id="clearAllBtn" title="ลบข้อมูลสมาชิกทั้งหมด">ล้างข้อมูลทั้งหมด</button>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <footer id="storage-note">กำลังโหลดข้อมูล...</footer>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

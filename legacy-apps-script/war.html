@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ทีม War — กิลผีชีวะ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">กำลังจัดแถวทีม War...</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-message" id="modalMessage"></div>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn modal-btn-cancel" id="modalCancel">ยกเลิก</button>
+      <button type="button" class="modal-btn modal-btn-confirm" id="modalConfirm">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editModalOverlay" hidden>
+  <div class="modal-box">
+    <div class="modal-title" id="editModalTitle">แก้ไขสมาชิก</div>
+    <div class="field" style="margin-bottom:14px;">
+      <label for="editNameInput">ชื่อผู้เล่น</label>
+      <div class="slot-edit-wrap">
+        <input type="text" id="editNameInput" placeholder="ค้นหาชื่อ..." autocomplete="off">
+        <div class="search-suggestions" id="editNameSuggestions" hidden></div>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:22px;">
+      <label for="editGearInput">ค่าพลัง (GEAR)</label>
+      <input type="number" id="editGearInput" placeholder="เช่น 21000" inputmode="numeric">
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn modal-btn-cancel" id="editModalCancel">ยกเลิก</button>
+      <button type="button" class="modal-btn modal-btn-confirm" id="editModalSave">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <svg class="crest" viewBox="0 0 48 48" fill="none">
+      <path d="M24 3 L41 12 V26 C41 36 33 43 24 45 C15 43 7 36 7 26 V12 Z" stroke="#7fe3b4" stroke-width="2" fill="rgba(127,227,180,0.06)"/>
+      <path d="M24 12 L24 30 M17 20 L31 20" stroke="#7fe3b4" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <h1>ทีม War</h1>
+    <div class="subtitle"><b id="teamCount">0</b> ทีม · <b id="playerCount">0</b> คน</div>
+  </header>
+
+  <nav class="nav">
+    <a href="index.html">🏰 ทำเนียบสมาชิก</a>
+    <a href="attendance.html">📋 เช็คชื่อ</a>
+    <a href="war.html" class="active">⚔️ War</a>
+    <a href="polarity.html">🔮 Polarity</a>
+  </nav>
+
+  <div class="sync-panel">
+    <div class="sync-row">
+      <span class="sync-dot off" id="syncDot"></span>
+      <span class="sync-status" id="syncStatus">กำลังเชื่อมต่อกับ Google Sheet...</span>
+      <span class="sync-actions">
+        <button class="sync-btn" id="editUrlBtn">เชื่อมต่อ / แก้ไข URL</button>
+        <button class="sync-btn" id="refreshBtn">รีเฟรชจากชีต</button>
+      </span>
+    </div>
+    <form class="sync-form" id="urlForm" style="display:none;">
+      <input type="url" id="urlInput" placeholder="วาง Web app URL ของ Apps Script ที่นี่ (ลงท้าย /exec)" autocomplete="off">
+      <button type="submit" class="sync-btn" style="border-color:var(--accent);color:var(--accent-glow);">บันทึก</button>
+    </form>
+    <div class="sync-error" id="syncError"></div>
+  </div>
+
+  <div class="team-grid team-grid-war" id="teamGrid"></div>
+
+  <footer id="storage-note">กำลังโหลดข้อมูล...</footer>
+</div>
+
+<script>const TEAM_SHEET_TYPE = 'war';</script>
+<script src="teams.js"></script>
+</body>
+</html>

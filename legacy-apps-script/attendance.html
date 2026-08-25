@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เช็คชื่อกิลวอร์ — กิลผีชีวะ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">กำลังเรียกวิญญาณมาเข้าแถว...</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-message" id="modalMessage"></div>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn modal-btn-cancel" id="modalCancel">ยกเลิก</button>
+      <button type="button" class="modal-btn modal-btn-confirm" id="modalConfirm">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <svg class="crest" viewBox="0 0 48 48" fill="none">
+      <path d="M24 3 L41 12 V26 C41 36 33 43 24 45 C15 43 7 36 7 26 V12 Z" stroke="#7fe3b4" stroke-width="2" fill="rgba(127,227,180,0.06)"/>
+      <path d="M24 12 L24 30 M17 20 L31 20" stroke="#7fe3b4" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <h1>เช็คชื่อกิลวอร์</h1>
+    <div class="subtitle">แตะชื่อเพื่อเปลี่ยนสถานะ แล้วกดบันทึกครั้งเดียวตอนเสร็จ</div>
+  </header>
+
+  <nav class="nav">
+    <a href="index.html">🏰 ทำเนียบสมาชิก</a>
+    <a href="attendance.html" class="active">📋 เช็คชื่อ</a>
+    <a href="war.html">⚔️ War</a>
+    <a href="polarity.html">🔮 Polarity</a>
+  </nav>
+
+  <div class="sync-panel">
+    <div class="sync-row">
+      <span class="sync-dot off" id="syncDot"></span>
+      <span class="sync-status" id="syncStatus">กำลังเชื่อมต่อกับ Google Sheet...</span>
+      <span class="sync-actions">
+        <button class="sync-btn" id="editUrlBtn">เชื่อมต่อ / แก้ไข URL</button>
+      </span>
+    </div>
+    <form class="sync-form" id="urlForm" style="display:none;">
+      <input type="url" id="urlInput" placeholder="วาง Web app URL ของ Apps Script ที่นี่ (ลงท้าย /exec)" autocomplete="off">
+      <button type="submit" class="sync-btn" style="border-color:var(--accent);color:var(--accent-glow);">บันทึก</button>
+    </form>
+    <div class="sync-error" id="syncError"></div>
+  </div>
+
+  <div class="date-panel">
+    <label for="dateInput">วันที่</label>
+    <input type="date" id="dateInput">
+    <button class="sync-btn" id="todayBtn">วันนี้</button>
+    <div class="date-chips" id="dateChips"></div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-count"><b id="presentCount">0</b> มา · <b id="absentCount">0</b> ขาด · <b id="unmarkedCount">0</b> ยังไม่เช็ค (จาก <b id="totalCount">0</b> คน)</div>
+    <div class="bulk-actions">
+      <button class="sync-btn" id="markAllPresentBtn">มาทั้งหมด</button>
+      <button class="sync-btn" id="markAllAbsentBtn">ขาดทั้งหมด</button>
+      <button class="sync-btn" id="clearAllMarksBtn">ล้างเครื่องหมาย</button>
+    </div>
+  </div>
+
+  <div class="search-box" style="max-width:340px; margin-bottom:16px;">
+    <input id="searchInput" type="text" placeholder="ค้นหาชื่อผู้เล่น..." autocomplete="off">
+    <div class="search-suggestions" id="searchSuggestions" hidden></div>
+  </div>
+
+  <div class="att-grid" id="attGrid"></div>
+
+  <div class="save-bar">
+    <button class="save-btn" id="saveBtn">บันทึกการเช็คชื่อ</button>
+  </div>
+
+  <footer id="storage-note">กำลังโหลดข้อมูล...</footer>
+</div>
+
+<script src="attendance.js"></script>
+</body>
+</html>
