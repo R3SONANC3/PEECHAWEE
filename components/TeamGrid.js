@@ -29,6 +29,25 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToColor }) {
   const { toast, toastUI } = useToast();
 
   const names = useMemo(() => Object.keys(nameToColor || {}), [nameToColor]);
+
+  // Group teams by their sheet section (e.g. TOP/MID/BOT), preserving the
+  // order they already come in from the server. Sheets with no section
+  // labels fall into a single unlabeled group.
+  const sections = useMemo(() => {
+    const groups = [];
+    const byLabel = new Map();
+    teams.forEach((team) => {
+      const key = team.section || '';
+      if (!byLabel.has(key)) {
+        const group = { label: team.section, teams: [] };
+        byLabel.set(key, group);
+        groups.push(group);
+      }
+      byLabel.get(key).teams.push(team);
+    });
+    return groups;
+  }, [teams]);
+
   const matches = nameQuery.trim()
     ? names.filter((n) => n.toLowerCase().includes(nameQuery.trim().toLowerCase())).slice(0, 8)
     : [];
@@ -78,40 +97,45 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToColor }) {
       {modal}
       {toastUI}
 
-      <div className="team-grid">
-        {teams.map((team) => (
-          <div className="team-card" key={team.name}>
-            <div className="team-head">
-              <div>
-                <div>{team.name}</div>
-                {team.total !== null && (
-                  <div className="team-avg">รวม {formatNum(team.total)} · เฉลี่ย {formatNum(team.average)}</div>
-                )}
+      {sections.map((sectionGroup) => (
+        <div className="team-section" key={sectionGroup.label || '_'}>
+          {sectionGroup.label && <h2 className="section-title">{sectionGroup.label}</h2>}
+          <div className="team-grid">
+            {sectionGroup.teams.map((team) => (
+              <div className="team-card" key={team.name}>
+                <div className="team-head">
+                  <div>
+                    <div>{team.name}</div>
+                    {team.total !== null && (
+                      <div className="team-avg">รวม {formatNum(team.total)} · เฉลี่ย {formatNum(team.average)}</div>
+                    )}
+                  </div>
+                  <span className="team-size">{team.members.length}/{team.slotCount}</span>
+                </div>
+                <ul className="team-members">
+                  {Array.from({ length: team.slotCount }, (_, i) => {
+                    const slot = i + 1;
+                    const m = team.members.find((mm) => mm.slot === slot);
+                    return (
+                      <li className={`team-member${m ? '' : ' empty'}`} key={slot}>
+                        <span className="slot-num">{slot}</span>
+                        <span className="member-label" style={m && nameToColor[m.name] ? { color: nameToColor[m.name] } : undefined}>
+                          {m ? m.name : 'ว่าง'}
+                        </span>
+                        {m && m.gear !== null && <span className="gear">{formatNum(m.gear)}</span>}
+                        <span className="slot-actions">
+                          <button type="button" className="icon-btn" onClick={() => openEdit(team.name, slot, m)} title={m ? 'แก้ไข' : 'เพิ่มชื่อ'}>✎</button>
+                          {m && <button type="button" className="icon-btn del" onClick={() => removeMember(team.name, slot, m.name)} title="ลบ">✕</button>}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-              <span className="team-size">{team.members.length}/{team.slotCount}</span>
-            </div>
-            <ul className="team-members">
-              {Array.from({ length: team.slotCount }, (_, i) => {
-                const slot = i + 1;
-                const m = team.members.find((mm) => mm.slot === slot);
-                return (
-                  <li className={`team-member${m ? '' : ' empty'}`} key={slot}>
-                    <span className="slot-num">{slot}</span>
-                    <span className="member-label" style={m && nameToColor[m.name] ? { color: nameToColor[m.name] } : undefined}>
-                      {m ? m.name : 'ว่าง'}
-                    </span>
-                    {m && m.gear !== null && <span className="gear">{formatNum(m.gear)}</span>}
-                    <span className="slot-actions">
-                      <button type="button" className="icon-btn" onClick={() => openEdit(team.name, slot, m)} title={m ? 'แก้ไข' : 'เพิ่มชื่อ'}>✎</button>
-                      {m && <button type="button" className="icon-btn del" onClick={() => removeMember(team.name, slot, m.name)} title="ลบ">✕</button>}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
 
       {editing && (
         <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setEditing(null); }}>
