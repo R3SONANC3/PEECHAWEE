@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useConfirm } from './useConfirm';
 import { useToast } from './useToast';
 import ClassIcon from './ClassIcon';
-import { CLASS_MAP } from '@/lib/classes';
+import { CLASS_MAP, CLASSES } from '@/lib/classes';
 
 function formatNum(n) {
   if (n === null || n === undefined || Number.isNaN(n)) return '';
@@ -25,6 +25,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
   const [teams, setTeams] = useState(initialTeams || []);
   const [editing, setEditing] = useState(null); // { team, slot, name, gear }
   const [nameQuery, setNameQuery] = useState('');
+  const [classFilter, setClassFilter] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const { confirm, modal } = useConfirm();
@@ -56,13 +57,17 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     return groups;
   }, [teams, sectionLabels]);
 
-  const matches = nameQuery.trim()
-    ? names.filter((n) => n.toLowerCase().includes(nameQuery.trim().toLowerCase())).slice(0, 8)
+  const matches = nameQuery.trim() || classFilter
+    ? names
+        .filter((n) => !classFilter || nameToClass[n] === classFilter)
+        .filter((n) => !nameQuery.trim() || n.toLowerCase().includes(nameQuery.trim().toLowerCase()))
+        .slice(0, 30)
     : [];
 
   function openEdit(team, slot, member) {
     setEditing({ team, slot, name: member?.name || '', gear: member?.gear ?? '' });
     setNameQuery('');
+    setClassFilter('');
     setError('');
   }
 
@@ -167,6 +172,27 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
                 placeholder="ค้นหาชื่อ..."
                 autoFocus
               />
+              <div className="class-filter-row">
+                <button
+                  type="button"
+                  className={`class-filter-chip all${classFilter === '' ? ' active' : ''}`}
+                  onClick={() => setClassFilter('')}
+                >
+                  ทั้งหมด
+                </button>
+                {CLASSES.map((c) => (
+                  <button
+                    type="button"
+                    key={c.key}
+                    className={`class-filter-chip${classFilter === c.key ? ' active' : ''}`}
+                    style={{ color: c.color }}
+                    title={c.key}
+                    onClick={() => setClassFilter(classFilter === c.key ? '' : c.key)}
+                  >
+                    <ClassIcon icon={c.icon} size={14} />
+                  </button>
+                ))}
+              </div>
               {matches.length > 0 && (
                 <div className="search-suggestions">
                   {matches.map((n) => (

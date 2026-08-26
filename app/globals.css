@@ -269,6 +269,16 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
 .suggestion-item { padding: 9px 14px; font-size: 13.5px; color: var(--text); cursor: pointer; }
 .suggestion-item:hover { background: var(--accent-soft); }
 
+.class-filter-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.class-filter-chip {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 28px; border-radius: 7px; border: 1px solid var(--border);
+  background: #fff; cursor: pointer; padding: 0;
+}
+.class-filter-chip.all { width: auto; padding: 0 10px; font-size: 12px; color: var(--text-dim); }
+.class-filter-chip:hover { border-color: var(--accent); }
+.class-filter-chip.active { background: var(--accent-soft); border-color: var(--accent); }
+
 /* ---------- Page loading spinner ---------- */
 .page-spinner { display: flex; justify-content: center; padding: 80px 0; }
 .spinner {
