@@ -4,28 +4,34 @@ import SetupNotice from '@/components/SetupNotice';
 
 export const dynamic = 'force-dynamic';
 
-// A name assigned to more than one team slot — across any team sheets,
-// not just two specific ones — is flagged as a duplicate. Names not found
-// in the Players roster are flagged too, since that usually means a typo.
+// A name assigned to more than one team slot within the SAME sheet is
+// flagged as a duplicate. The same name appearing on different sheets is
+// not a duplicate. Names not found in the Players roster are flagged too,
+// since that usually means a typo.
 async function findDuplicates() {
   const sheetTitles = await listTeamSheetTitles();
   const rosterMap = await readRoster();
   const playerNames = new Set(Object.values(rosterMap).flat());
 
-  const locations = new Map();
+  const results = [];
   for (const title of sheetTitles) {
     const teams = await readTeams(title);
+    const locations = new Map();
     teams.forEach((team) => {
       team.members.forEach((m) => {
         if (!locations.has(m.name)) locations.set(m.name, []);
         locations.get(m.name).push({ sheet: title, team: team.name, slot: m.slot });
       });
     });
+
+    [...locations.entries()]
+      .filter(([, spots]) => spots.length > 1)
+      .forEach(([name, spots]) => {
+        results.push({ name, spots, unknown: !playerNames.has(name) });
+      });
   }
 
-  return [...locations.entries()]
-    .filter(([, spots]) => spots.length > 1)
-    .map(([name, spots]) => ({ name, spots, unknown: !playerNames.has(name) }));
+  return results;
 }
 
 export default async function DuplicatesPage() {
@@ -51,8 +57,8 @@ export default async function DuplicatesPage() {
         <p className="subtitle">ไม่พบชื่อซ้ำ ✅</p>
       ) : (
         <ul className="dup-list">
-          {duplicates.map((d) => (
-            <li key={d.name} className="dup-item">
+          {duplicates.map((d, i) => (
+            <li key={`${d.spots[0].sheet}-${d.name}-${i}`} className="dup-item">
               <div className="dup-name">
                 {d.name}
                 {d.unknown && <span className="dup-flag">ไม่พบในทำเนียบ</span>}
