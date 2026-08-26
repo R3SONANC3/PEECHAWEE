@@ -205,6 +205,12 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
   text-transform: uppercase; margin: 0 0 12px; padding-left: 2px;
 }
 .team-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+/* Below ~1080px, 5 fixed columns crush card width below the ~220px a name
+   needs to stay on one line (see commit fixing team-card single-line
+   names) — fall back to as-many-as-fit instead of forcing 5. */
+@media (max-width: 1080px) {
+  .team-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+}
 
 .team-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
 .team-head {
