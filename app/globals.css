@@ -185,6 +185,7 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
   width: 20px; height: 20px; border-radius: 50%; background: var(--border-soft); color: var(--text-faint);
   font-size: 11.5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
+.team-member .member-name-text { white-space: normal; overflow: visible; text-overflow: clip; word-break: break-word; }
 
 /* ---------- Duplicate name check ---------- */
 .dup-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }

@@ -1,5 +1,7 @@
 import { listTeamSheetTitles, readTeams } from '@/lib/teams';
-import { readRoster } from '@/lib/roster';
+import { buildNameToClass } from '@/lib/nameToColor';
+import { CLASS_MAP } from '@/lib/classes';
+import ClassIcon from '@/components/ClassIcon';
 import SetupNotice from '@/components/SetupNotice';
 
 export const dynamic = 'force-dynamic';
@@ -11,8 +13,7 @@ export const dynamic = 'force-dynamic';
 // on any sheet are flagged separately, so nobody gets left out.
 async function findIssues() {
   const sheetTitles = await listTeamSheetTitles();
-  const rosterMap = await readRoster();
-  const playerNames = new Set(Object.values(rosterMap).flat());
+  const nameToClass = await buildNameToClass();
   const assignedNames = new Set();
 
   const duplicates = [];
@@ -30,23 +31,35 @@ async function findIssues() {
     [...locations.entries()]
       .filter(([, spots]) => spots.length > 1)
       .forEach(([name, spots]) => {
-        duplicates.push({ name, spots, unknown: !playerNames.has(name) });
+        duplicates.push({ name, spots, unknown: !(name in nameToClass) });
       });
   }
 
-  const unassigned = Object.entries(rosterMap).flatMap(([cls, names]) =>
-    names.filter((name) => !assignedNames.has(name)).map((name) => ({ name, cls }))
-  );
+  const unassigned = Object.entries(nameToClass)
+    .filter(([name]) => !assignedNames.has(name))
+    .map(([name, cls]) => ({ name, cls }));
 
-  return { duplicates, unassigned };
+  return { duplicates, unassigned, nameToClass };
+}
+
+function ClassName({ name, clsKey }) {
+  const cls = CLASS_MAP[clsKey];
+  if (!cls) return <>{name}</>;
+  return (
+    <span style={{ color: cls.color, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <ClassIcon icon={cls.icon} size={14} />
+      {name}
+    </span>
+  );
 }
 
 export default async function DuplicatesPage() {
   let duplicates = null;
   let unassigned = null;
+  let nameToClass = {};
   let error = null;
   try {
-    ({ duplicates, unassigned } = await findIssues());
+    ({ duplicates, unassigned, nameToClass } = await findIssues());
   } catch (e) {
     error = e.message === 'MISSING_GOOGLE_CREDENTIALS' ? 'missing-credentials' : 'fetch-failed';
   }
@@ -72,7 +85,7 @@ export default async function DuplicatesPage() {
               {duplicates.map((d, i) => (
                 <li key={`${d.spots[0].sheet}-${d.name}-${i}`} className="dup-item">
                   <div className="dup-name">
-                    {d.name}
+                    <ClassName name={d.name} clsKey={nameToClass[d.name]} />
                     {d.unknown && <span className="dup-flag">ไม่พบในทำเนียบ</span>}
                   </div>
                   <ul className="dup-spots">
@@ -93,7 +106,8 @@ export default async function DuplicatesPage() {
               {unassigned.map((u) => (
                 <li key={`${u.cls}-${u.name}`} className="dup-item">
                   <div className="dup-name">
-                    {u.name} <span className="dup-flag">{u.cls}</span>
+                    <ClassName name={u.name} clsKey={u.cls} />
+                    <span className="dup-flag">{CLASS_MAP[u.cls]?.th || u.cls}</span>
                   </div>
                 </li>
               ))}
