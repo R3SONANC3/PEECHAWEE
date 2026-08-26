@@ -4,11 +4,7 @@ import { useConfirm } from './useConfirm';
 import { useToast } from './useToast';
 import ClassIcon from './ClassIcon';
 import { CLASS_MAP, CLASSES } from '@/lib/classes';
-
-function formatNum(n) {
-  if (n === null || n === undefined || Number.isNaN(n)) return '';
-  return Number.isInteger(n) ? n.toLocaleString() : n.toLocaleString(undefined, { maximumFractionDigits: 1 });
-}
+import { formatNum } from '@/lib/format';
 
 async function callApi(body) {
   const res = await fetch('/api/teams', {

@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useConfirm } from './useConfirm';
 import { useToast } from './useToast';
 import ClassIcon from './ClassIcon';
+import { formatNum } from '@/lib/format';
 
 async function callApi(body) {
   const res = await fetch('/api/roster', {
@@ -15,7 +16,7 @@ async function callApi(body) {
   return data.roster;
 }
 
-export default function RosterBoard({ initialRoster, classes }) {
+export default function RosterBoard({ initialRoster, classes, gearMap }) {
   const [roster, setRoster] = useState(initialRoster);
   const [query, setQuery] = useState('');
   const [name, setName] = useState('');
@@ -228,6 +229,7 @@ export default function RosterBoard({ initialRoster, classes }) {
                     </div>
                   )}
                 </span>
+                {gearMap?.[m] !== undefined && <span className="gear">{formatNum(gearMap[m])}</span>}
                 <span className="row-actions">
                   <button type="button" className="icon-btn" onClick={() => startEdit(c.key, m)} title="แก้ไข">✎</button>
                   <button type="button" className="icon-btn del" onClick={() => handleDelete(c.key, m)} title="ลบ">✕</button>
