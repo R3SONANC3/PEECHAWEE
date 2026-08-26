@@ -30,7 +30,7 @@ h1, h2, .panel-title, .team-head, .modal-title {
 a { color: inherit; }
 button { font-family: inherit; }
 
-.wrap { max-width: 1080px; margin: 0 auto; padding: 20px 20px 80px; }
+.wrap { max-width: 1520px; margin: 0 auto; padding: 20px 20px 80px; }
 
 /* ---------- Nav ---------- */
 .nav {
@@ -164,7 +164,7 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
   font-weight: 700; font-size: 13px; color: var(--text-dim); letter-spacing: 0.08em;
   text-transform: uppercase; margin: 0 0 12px; padding-left: 2px;
 }
-.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.team-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
 
 .team-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
 .team-head {
