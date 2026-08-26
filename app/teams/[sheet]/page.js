@@ -1,4 +1,4 @@
-import { readTeams } from '@/lib/teams';
+import { readTeams, listSections } from '@/lib/teams';
 import { buildNameToClass } from '@/lib/nameToColor';
 import TeamGrid from '@/components/TeamGrid';
 import SetupNotice from '@/components/SetupNotice';
@@ -10,10 +10,12 @@ export default async function TeamSheetPage({ params }) {
   const title = decodeURIComponent(sheet);
 
   let teams = null;
+  let sectionLabels = [];
   let nameToClass = {};
   let error = null;
   try {
     teams = await readTeams(title);
+    sectionLabels = await listSections(title);
     nameToClass = await buildNameToClass();
   } catch (e) {
     error = e.message === 'MISSING_GOOGLE_CREDENTIALS' ? 'missing-credentials' : 'fetch-failed';
@@ -27,7 +29,7 @@ export default async function TeamSheetPage({ params }) {
           {teams ? `${teams.length} ทีม · ${teams.reduce((n, t) => n + t.members.length, 0)} คน` : ''}
         </p>
       </header>
-      {error ? <SetupNotice type={error} /> : <TeamGrid sheetTitle={title} initialTeams={teams} nameToClass={nameToClass} />}
+      {error ? <SetupNotice type={error} /> : <TeamGrid sheetTitle={title} initialTeams={teams} sectionLabels={sectionLabels} nameToClass={nameToClass} />}
     </main>
   );
 }

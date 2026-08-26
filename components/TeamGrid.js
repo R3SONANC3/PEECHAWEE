@@ -21,7 +21,7 @@ async function callApi(body) {
   return data.teams;
 }
 
-export default function TeamGrid({ sheetTitle, initialTeams, nameToClass }) {
+export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass }) {
   const [teams, setTeams] = useState(initialTeams || []);
   const [editing, setEditing] = useState(null); // { team, slot, name, gear }
   const [nameQuery, setNameQuery] = useState('');
@@ -34,10 +34,16 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToClass }) {
 
   // Group teams by their sheet section (e.g. TOP/MID/BOT), preserving the
   // order they already come in from the server. Sheets with no section
-  // labels fall into a single unlabeled group.
+  // labels fall into a single unlabeled group. Labels are seeded up front
+  // so a section with no teams yet (e.g. an empty shift) still shows up.
   const sections = useMemo(() => {
     const groups = [];
     const byLabel = new Map();
+    (sectionLabels || []).forEach((label) => {
+      const group = { label, teams: [] };
+      byLabel.set(label, group);
+      groups.push(group);
+    });
     teams.forEach((team) => {
       const key = team.section || '';
       if (!byLabel.has(key)) {
@@ -48,7 +54,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToClass }) {
       byLabel.get(key).teams.push(team);
     });
     return groups;
-  }, [teams]);
+  }, [teams, sectionLabels]);
 
   const matches = nameQuery.trim()
     ? names.filter((n) => n.toLowerCase().includes(nameQuery.trim().toLowerCase())).slice(0, 8)
@@ -102,6 +108,9 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToClass }) {
       {sections.map((sectionGroup) => (
         <div className="team-section" key={sectionGroup.label || '_'}>
           {sectionGroup.label && <h2 className="section-title">{sectionGroup.label}</h2>}
+          {sectionGroup.teams.length === 0 ? (
+            <p className="subtitle">ยังไม่มีทีมในส่วนนี้</p>
+          ) : (
           <div className="team-grid">
             {sectionGroup.teams.map((team) => (
               <div className="team-card" key={team.name}>
@@ -142,6 +151,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, nameToClass }) {
               </div>
             ))}
           </div>
+          )}
         </div>
       ))}
 
