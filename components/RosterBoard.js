@@ -25,6 +25,7 @@ export default function RosterBoard({ initialRoster, classes }) {
   const [editing, setEditing] = useState(null); // { cls, name }
   const [editName, setEditName] = useState('');
   const [editCls, setEditCls] = useState('');
+  const [classPickerFor, setClassPickerFor] = useState(null); // { cls, name }
   const { confirm, modal } = useConfirm();
   const { toast, toastUI } = useToast();
 
@@ -98,6 +99,19 @@ export default function RosterBoard({ initialRoster, classes }) {
     }
   }
 
+  async function changeClass(oldCls, memberName, newCls) {
+    setClassPickerFor(null);
+    if (newCls === oldCls) return;
+    setBusy(true);
+    try {
+      const updated = await callApi({ action: 'edit', oldName: memberName, oldCls, newName: memberName, newCls });
+      setRoster(updated);
+      toast(`ย้าย "${memberName}" ไป ${newCls} แล้ว`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const q = query.trim().toLowerCase();
 
   return (
@@ -163,9 +177,67 @@ export default function RosterBoard({ initialRoster, classes }) {
             .filter((n) => !q || n.toLowerCase().includes(q))
             .slice()
             .sort((a, b) => a.localeCompare(b, 'th'));
+          // Cap 15 per column: split into however many equal-ish columns
+          // that takes, rather than one long scroll for a big class.
+          const colCount = Math.max(1, Math.ceil(members.length / 15));
+          const perCol = Math.ceil(members.length / colCount) || 1;
+          const memberCols = Array.from({ length: colCount }, (_, i) => members.slice(i * perCol, (i + 1) * perCol));
+
+          function renderMember(m) {
+            const isEditing = editing && editing.cls === c.key && editing.name === m;
+            if (isEditing) {
+              return (
+                <li className="edit-row" key={m}>
+                  <input value={editName} onChange={(e) => setEditName(e.target.value)} autoFocus />
+                  <select value={editCls} onChange={(e) => setEditCls(e.target.value)}>
+                    {classes.map((cc) => <option key={cc.key} value={cc.key}>{cc.key}</option>)}
+                  </select>
+                  <button type="button" className="icon-btn" onClick={saveEdit} title="บันทึก">✓</button>
+                  <button type="button" className="icon-btn del" onClick={() => setEditing(null)} title="ยกเลิก">✕</button>
+                </li>
+              );
+            }
+            const pickerOpen = classPickerFor?.cls === c.key && classPickerFor?.name === m;
+            return (
+              <li className="member-row" key={m}>
+                <span className="member-name" style={{ color: c.color }}>
+                  <button
+                    type="button"
+                    className="class-badge"
+                    style={{ background: c.color }}
+                    title="เปลี่ยนอาชีพ"
+                    onClick={() => setClassPickerFor(pickerOpen ? null : { cls: c.key, name: m })}
+                  >
+                    <ClassIcon icon={c.icon} size={12} />
+                  </button>
+                  <span className="member-name-text">{m}</span>
+                  {pickerOpen && (
+                    <div className="class-filter-row class-badge-popover">
+                      {classes.map((cc) => (
+                        <button
+                          type="button"
+                          key={cc.key}
+                          className={`class-filter-chip${cc.key === c.key ? ' active' : ''}`}
+                          style={{ color: cc.color }}
+                          title={cc.key}
+                          onClick={() => changeClass(c.key, m, cc.key)}
+                        >
+                          <ClassIcon icon={cc.icon} size={14} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </span>
+                <span className="row-actions">
+                  <button type="button" className="icon-btn" onClick={() => startEdit(c.key, m)} title="แก้ไข">✎</button>
+                  <button type="button" className="icon-btn del" onClick={() => handleDelete(c.key, m)} title="ลบ">✕</button>
+                </span>
+              </li>
+            );
+          }
 
           return (
-            <div className="class-card" key={c.key}>
+            <div className="class-card" key={c.key} style={colCount > 1 ? { gridColumn: `span ${Math.min(colCount, 3)}` } : undefined}>
               <div className="class-head">
                 <span className="class-icon" style={{ background: c.color }}>
                   <ClassIcon icon={c.icon} size={16} />
@@ -176,36 +248,19 @@ export default function RosterBoard({ initialRoster, classes }) {
                 </div>
                 <span className="class-count">{members.length}</span>
               </div>
-              <ul className="class-list">
-                {members.length === 0 && <li className="empty-note">{q ? 'ไม่พบผู้เล่น' : 'ยังไม่มีสมาชิก'}</li>}
-                {members.map((m) => {
-                  const isEditing = editing && editing.cls === c.key && editing.name === m;
-                  if (isEditing) {
-                    return (
-                      <li className="edit-row" key={m}>
-                        <input value={editName} onChange={(e) => setEditName(e.target.value)} autoFocus />
-                        <select value={editCls} onChange={(e) => setEditCls(e.target.value)}>
-                          {classes.map((cc) => <option key={cc.key} value={cc.key}>{cc.key}</option>)}
-                        </select>
-                        <button type="button" className="icon-btn" onClick={saveEdit} title="บันทึก">✓</button>
-                        <button type="button" className="icon-btn del" onClick={() => setEditing(null)} title="ยกเลิก">✕</button>
-                      </li>
-                    );
-                  }
-                  return (
-                    <li className="member-row" key={m}>
-                      <span className="member-name" style={{ color: c.color }}>
-                        <ClassIcon icon={c.icon} size={14} className="member-icon" />
-                        <span className="member-name-text">{m}</span>
-                      </span>
-                      <span className="row-actions">
-                        <button type="button" className="icon-btn" onClick={() => startEdit(c.key, m)} title="แก้ไข">✎</button>
-                        <button type="button" className="icon-btn del" onClick={() => handleDelete(c.key, m)} title="ลบ">✕</button>
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
+              {members.length === 0 ? (
+                <ul className="class-list">
+                  <li className="empty-note">{q ? 'ไม่พบผู้เล่น' : 'ยังไม่มีสมาชิก'}</li>
+                </ul>
+              ) : (
+                <div className={colCount > 1 ? 'class-list-cols' : undefined}>
+                  {memberCols.map((col, ci) => (
+                    <ul className="class-list" key={ci}>
+                      {col.map((m) => renderMember(m))}
+                    </ul>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

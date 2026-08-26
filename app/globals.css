@@ -131,13 +131,24 @@ button { font-family: inherit; }
 .class-en { font-family: var(--font-serif), serif; font-weight: 600; font-size: 14.5px; color: var(--text); }
 .class-th { font-size: 11px; color: var(--text-faint); }
 .class-count { margin-left: auto; font-size: 12px; color: var(--text-dim); background: var(--border-soft); padding: 2px 9px; border-radius: 20px; font-variant-numeric: tabular-nums; }
-.class-list { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 2px; min-height: 8px; }
+.class-list { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 2px; min-height: 8px; flex: 1; min-width: 0; }
+.class-list-cols { display: flex; }
+.class-list-cols .class-list:not(:first-child) { border-left: 1px solid var(--border-soft); }
 .empty-note { color: var(--text-faint); font-size: 12.5px; padding: 14px 12px; text-align: center; list-style: none; }
 
 .member-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; font-size: 13.5px; color: var(--text); }
 .member-row:hover { background: var(--border-soft); }
-.member-name { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-weight: 500; }
+.member-name { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-weight: 500; position: relative; }
 .member-icon { flex-shrink: 0; opacity: 0.85; }
+.class-badge {
+  flex-shrink: 0; border: none; padding: 0; width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;
+}
+.class-badge-popover {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: 210px;
+  background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 6px;
+  box-shadow: 0 12px 28px rgba(16, 24, 40, .12);
+}
 .member-name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-actions { display: flex; gap: 4px; opacity: .5; }
 .member-row:hover .row-actions { opacity: 1; }
