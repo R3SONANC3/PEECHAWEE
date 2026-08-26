@@ -1,6 +1,7 @@
 import { readRoster } from '@/lib/roster';
 import { readGearMap } from '@/lib/gear';
 import { CLASSES } from '@/lib/classes';
+import { isAdmin } from '@/lib/auth';
 import RosterBoard from '@/components/RosterBoard';
 import SetupNotice from '@/components/SetupNotice';
 
@@ -12,6 +13,7 @@ export default async function RosterPage() {
   let roster = null;
   let gearMap = {};
   let error = null;
+  const admin = await isAdmin();
   try {
     roster = await readRoster();
     gearMap = await readGearMap();
@@ -25,7 +27,7 @@ export default async function RosterPage() {
         <h1>ทำเนียบสมาชิกกิลผีชีวะ</h1>
         <p className="subtitle">จัดการรายชื่อสมาชิก · เพิ่ม แก้ไข และลบข้อมูลตามคลาส</p>
       </header>
-      {error ? <SetupNotice type={error} /> : <RosterBoard initialRoster={roster} classes={CLASSES} gearMap={gearMap} />}
+      {error ? <SetupNotice type={error} /> : <RosterBoard initialRoster={roster} classes={CLASSES} gearMap={gearMap} isAdmin={admin} />}
     </main>
   );
 }

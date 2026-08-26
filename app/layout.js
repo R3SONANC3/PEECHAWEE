@@ -1,7 +1,9 @@
 import { Noto_Sans_Thai, Noto_Serif_Thai } from 'next/font/google';
 import './globals.css';
 import Nav from '@/components/Nav';
+import RoleGate from '@/components/RoleGate';
 import { listTeamSheetTitles } from '@/lib/teams';
+import { isAdmin } from '@/lib/auth';
 
 const notoSans = Noto_Sans_Thai({
   variable: '--font-sans',
@@ -31,13 +33,16 @@ export default async function RootLayout({ children }) {
   } catch (e) {
     teamSheets = [];
   }
+  const admin = await isAdmin();
 
   return (
     <html lang="th" className={`${notoSans.variable} ${notoSerif.variable}`}>
       <body>
         <div className="wrap">
-          <Nav teamSheets={teamSheets} />
-          {children}
+          <RoleGate isAdmin={admin}>
+            <Nav teamSheets={teamSheets} isAdmin={admin} />
+            {children}
+          </RoleGate>
         </div>
       </body>
     </html>

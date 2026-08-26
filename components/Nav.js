@@ -8,12 +8,18 @@ const BASE_LINKS = [
   { href: '/duplicates', label: '🔁 ชื่อซ้ำ' },
 ];
 
-export default function Nav({ teamSheets = [] }) {
+export default function Nav({ teamSheets = [], isAdmin }) {
   const pathname = usePathname();
   const links = [
     ...BASE_LINKS,
     ...teamSheets.map((title) => ({ href: `/teams/${encodeURIComponent(title)}`, label: `⚔️ ${title}` })),
   ];
+
+  async function switchRole() {
+    if (isAdmin) await fetch('/api/auth', { method: 'DELETE' });
+    localStorage.removeItem('guild_role');
+    window.location.reload();
+  }
 
   return (
     <nav className="nav">
@@ -22,6 +28,9 @@ export default function Nav({ teamSheets = [] }) {
           {l.label}
         </Link>
       ))}
+      <button type="button" className="nav-role-switch" onClick={switchRole} title="เปลี่ยนโหมด">
+        {isAdmin ? '🛡️ ผู้บริหาร' : '👤 Member'}
+      </button>
     </nav>
   );
 }

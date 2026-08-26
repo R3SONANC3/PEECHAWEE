@@ -45,6 +45,33 @@ button { font-family: inherit; }
 }
 .nav-link:hover { background: var(--border-soft); color: var(--text); }
 .nav-link.active { background: var(--accent); color: #fff; }
+.nav-role-switch {
+  flex-shrink: 0; margin-left: auto; white-space: nowrap; font-size: 13px; font-weight: 600;
+  color: var(--text-dim); background: var(--border-soft); border: none; border-radius: 999px;
+  padding: 9px 16px; cursor: pointer;
+}
+.nav-role-switch:hover { background: var(--accent-soft); color: var(--accent-dim); }
+
+/* ---------- Role gate (Member / ผู้บริหาร) ---------- */
+.role-gate { display: flex; align-items: center; justify-content: center; min-height: 70vh; }
+.role-gate-box {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 32px; width: 100%; max-width: 400px; text-align: center;
+}
+.role-gate-box input {
+  background: #fff; border: 1px solid var(--border); color: var(--text);
+  padding: 10px 12px; border-radius: 8px; font-size: 14px;
+}
+.role-gate-box input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+.role-gate-choices { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.role-gate-btn {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  background: #fff; border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; cursor: pointer; text-align: left;
+}
+.role-gate-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.role-gate-btn-title { font-weight: 600; font-size: 15px; color: var(--text); }
+.role-gate-btn-desc { font-size: 12.5px; color: var(--text-dim); }
 
 /* ---------- Page header ---------- */
 .page-header { margin-bottom: 22px; }
@@ -143,8 +170,9 @@ button { font-family: inherit; }
 .member-icon { flex-shrink: 0; opacity: 0.85; }
 .class-badge {
   flex-shrink: 0; border: none; padding: 0; width: 20px; height: 20px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: #fff;
 }
+button.class-badge { cursor: pointer; }
 .class-badge-popover {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: 210px;
   background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 6px;
@@ -258,6 +286,9 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
 .att-box:hover { border-color: var(--text-dim); color: var(--text); }
 .att-box.check.active { background: var(--ok); border-color: var(--ok); color: #fff; }
 .att-box.cross.active { background: var(--danger); border-color: var(--danger); color: #fff; }
+.att-boxes-readonly { font-size: 13px; font-weight: 700; color: var(--text-faint); flex-shrink: 0; }
+.att-chip.present .att-boxes-readonly { color: var(--ok); }
+.att-chip.absent .att-boxes-readonly { color: var(--danger); }
 .att-chip.present { border-color: var(--ok); background: #f0fdf4; }
 .att-chip.absent { border-color: var(--danger); background: var(--danger-soft); }
 

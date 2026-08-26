@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readTeams, updateTeamSlot } from '@/lib/teams';
 import { readGearMap, applyGearMap, setGear } from '@/lib/gear';
+import { isAdmin } from '@/lib/auth';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -15,6 +16,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  if (!(await isAdmin())) return NextResponse.json({ ok: false, error: 'ไม่มีสิทธิ์แก้ไขข้อมูล' }, { status: 401 });
   const body = await request.json();
   try {
     await updateTeamSlot(body.sheet, body.team, body.slot, body.name);

@@ -16,7 +16,7 @@ async function callApi(body) {
   return data.roster;
 }
 
-export default function RosterBoard({ initialRoster, classes, gearMap }) {
+export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }) {
   const [roster, setRoster] = useState(initialRoster);
   const [query, setQuery] = useState('');
   const [name, setName] = useState('');
@@ -144,23 +144,27 @@ export default function RosterBoard({ initialRoster, classes, gearMap }) {
         </div>
       </section>
 
-      <div className="panel-title">เพิ่มสมาชิกใหม่</div>
-      <form className="add-form" onSubmit={handleAdd}>
-        <div className="field">
-          <label htmlFor="nameInput">ชื่อผู้เล่น</label>
-          <input id="nameInput" value={name} onChange={(e) => setName(e.target.value)} placeholder="เช่น Kotoha" autoComplete="off" />
-        </div>
-        <div className="field">
-          <label htmlFor="classInput">คลาส</label>
-          <select id="classInput" value={cls} onChange={(e) => setCls(e.target.value)}>
-            {classes.map((c) => <option key={c.key} value={c.key}>{c.key} · {c.th}</option>)}
-          </select>
-        </div>
-        <button type="submit" className="btn btn-add" disabled={busy}>
-          {busy ? 'กำลังเพิ่ม...' : '+ เพิ่มสมาชิก'}
-        </button>
-        <div className="form-msg">{formMsg}</div>
-      </form>
+      {isAdmin && (
+        <>
+          <div className="panel-title">เพิ่มสมาชิกใหม่</div>
+          <form className="add-form" onSubmit={handleAdd}>
+            <div className="field">
+              <label htmlFor="nameInput">ชื่อผู้เล่น</label>
+              <input id="nameInput" value={name} onChange={(e) => setName(e.target.value)} placeholder="เช่น Kotoha" autoComplete="off" />
+            </div>
+            <div className="field">
+              <label htmlFor="classInput">คลาส</label>
+              <select id="classInput" value={cls} onChange={(e) => setCls(e.target.value)}>
+                {classes.map((c) => <option key={c.key} value={c.key}>{c.key} · {c.th}</option>)}
+              </select>
+            </div>
+            <button type="submit" className="btn btn-add" disabled={busy}>
+              {busy ? 'กำลังเพิ่ม...' : '+ เพิ่มสมาชิก'}
+            </button>
+            <div className="form-msg">{formMsg}</div>
+          </form>
+        </>
+      )}
 
       <div className="toolbar">
         <input
@@ -185,7 +189,7 @@ export default function RosterBoard({ initialRoster, classes, gearMap }) {
           const memberCols = Array.from({ length: colCount }, (_, i) => members.slice(i * perCol, (i + 1) * perCol));
 
           function renderMember(m) {
-            const isEditing = editing && editing.cls === c.key && editing.name === m;
+            const isEditing = isAdmin && editing && editing.cls === c.key && editing.name === m;
             if (isEditing) {
               return (
                 <li className="edit-row" key={m}>
@@ -198,19 +202,25 @@ export default function RosterBoard({ initialRoster, classes, gearMap }) {
                 </li>
               );
             }
-            const pickerOpen = classPickerFor?.cls === c.key && classPickerFor?.name === m;
+            const pickerOpen = isAdmin && classPickerFor?.cls === c.key && classPickerFor?.name === m;
             return (
               <li className="member-row" key={m}>
                 <span className="member-name" style={{ color: c.color }}>
-                  <button
-                    type="button"
-                    className="class-badge"
-                    style={{ background: c.color }}
-                    title="เปลี่ยนอาชีพ"
-                    onClick={() => setClassPickerFor(pickerOpen ? null : { cls: c.key, name: m })}
-                  >
-                    <ClassIcon icon={c.icon} size={12} />
-                  </button>
+                  {isAdmin ? (
+                    <button
+                      type="button"
+                      className="class-badge"
+                      style={{ background: c.color }}
+                      title="เปลี่ยนอาชีพ"
+                      onClick={() => setClassPickerFor(pickerOpen ? null : { cls: c.key, name: m })}
+                    >
+                      <ClassIcon icon={c.icon} size={12} />
+                    </button>
+                  ) : (
+                    <span className="class-badge" style={{ background: c.color }}>
+                      <ClassIcon icon={c.icon} size={12} />
+                    </span>
+                  )}
                   <span className="member-name-text">{m}</span>
                   {pickerOpen && (
                     <div className="class-filter-row class-badge-popover">
@@ -230,10 +240,12 @@ export default function RosterBoard({ initialRoster, classes, gearMap }) {
                   )}
                 </span>
                 {gearMap?.[m] !== undefined && <span className="gear">{formatNum(gearMap[m])}</span>}
-                <span className="row-actions">
-                  <button type="button" className="icon-btn" onClick={() => startEdit(c.key, m)} title="แก้ไข">✎</button>
-                  <button type="button" className="icon-btn del" onClick={() => handleDelete(c.key, m)} title="ลบ">✕</button>
-                </span>
+                {isAdmin && (
+                  <span className="row-actions">
+                    <button type="button" className="icon-btn" onClick={() => startEdit(c.key, m)} title="แก้ไข">✎</button>
+                    <button type="button" className="icon-btn del" onClick={() => handleDelete(c.key, m)} title="ลบ">✕</button>
+                  </span>
+                )}
               </li>
             );
           }

@@ -17,7 +17,7 @@ async function callApi(body) {
   return data.teams;
 }
 
-export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass }) {
+export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass, isAdmin }) {
   const [teams, setTeams] = useState(initialTeams || []);
   const [editing, setEditing] = useState(null); // { team, slot, name, gear }
   const [nameQuery, setNameQuery] = useState('');
@@ -141,10 +141,12 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
                           );
                         })()}
                         {m && m.gear !== null && <span className="gear">{formatNum(m.gear)}</span>}
-                        <span className="slot-actions">
-                          <button type="button" className="icon-btn" onClick={() => openEdit(team.name, slot, m)} title={m ? 'แก้ไข' : 'เพิ่มชื่อ'}>✎</button>
-                          {m && <button type="button" className="icon-btn del" onClick={() => removeMember(team.name, slot, m.name)} title="ลบ">✕</button>}
-                        </span>
+                        {isAdmin && (
+                          <span className="slot-actions">
+                            <button type="button" className="icon-btn" onClick={() => openEdit(team.name, slot, m)} title={m ? 'แก้ไข' : 'เพิ่มชื่อ'}>✎</button>
+                            {m && <button type="button" className="icon-btn del" onClick={() => removeMember(team.name, slot, m.name)} title="ลบ">✕</button>}
+                          </span>
+                        )}
                       </li>
                     );
                   })}

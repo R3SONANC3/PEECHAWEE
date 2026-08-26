@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readRoster, addMember, deleteMember, editMember } from '@/lib/roster';
+import { isAdmin } from '@/lib/auth';
 
 export async function GET() {
   try {
@@ -11,6 +12,7 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  if (!(await isAdmin())) return NextResponse.json({ ok: false, error: 'ไม่มีสิทธิ์แก้ไขข้อมูล' }, { status: 401 });
   const body = await request.json();
   try {
     let roster;

@@ -1,4 +1,5 @@
 import { getAttendanceForDate } from '@/lib/attendance';
+import { isAdmin } from '@/lib/auth';
 import AttendanceBoard from '@/components/AttendanceBoard';
 import SetupNotice from '@/components/SetupNotice';
 
@@ -13,6 +14,7 @@ export default async function AttendancePage() {
   const today = todayLabel();
   let data = null;
   let error = null;
+  const admin = await isAdmin();
   try {
     data = await getAttendanceForDate(today);
   } catch (e) {
@@ -25,7 +27,7 @@ export default async function AttendancePage() {
         <h1>เช็คชื่อกิลวอร์</h1>
         <p className="subtitle">แตะชื่อเพื่อเปลี่ยนสถานะ แล้วกดบันทึกครั้งเดียวตอนเสร็จ</p>
       </header>
-      {error ? <SetupNotice type={error} /> : <AttendanceBoard initialData={data} today={today} />}
+      {error ? <SetupNotice type={error} /> : <AttendanceBoard initialData={data} today={today} isAdmin={admin} />}
     </main>
   );
 }

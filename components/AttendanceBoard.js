@@ -16,7 +16,7 @@ function todayLabel() {
   return `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
 }
 
-export default function AttendanceBoard({ initialData, today }) {
+export default function AttendanceBoard({ initialData, today, isAdmin }) {
   const [names, setNames] = useState(initialData.names);
   const [dates, setDates] = useState(initialData.dates);
   const [currentDate, setCurrentDate] = useState(initialData.date || today);
@@ -150,11 +150,13 @@ export default function AttendanceBoard({ initialData, today }) {
         <div className="summary-count">
           <b>{summary.present}</b> มา · <b>{summary.absent}</b> ขาด · <b>{summary.unmarked}</b> ยังไม่เช็ค (จาก <b>{summary.total}</b> คน)
         </div>
-        <div className="bulk-actions">
-          <button type="button" className="sync-btn" onClick={() => bulkSet('present')}>มาทั้งหมด</button>
-          <button type="button" className="sync-btn" onClick={() => bulkSet('absent')}>ขาดทั้งหมด</button>
-          <button type="button" className="sync-btn" onClick={() => bulkSet(null)}>ล้างเครื่องหมาย</button>
-        </div>
+        {isAdmin && (
+          <div className="bulk-actions">
+            <button type="button" className="sync-btn" onClick={() => bulkSet('present')}>มาทั้งหมด</button>
+            <button type="button" className="sync-btn" onClick={() => bulkSet('absent')}>ขาดทั้งหมด</button>
+            <button type="button" className="sync-btn" onClick={() => bulkSet(null)}>ล้างเครื่องหมาย</button>
+          </div>
+        )}
       </div>
 
       <input
@@ -172,20 +174,26 @@ export default function AttendanceBoard({ initialData, today }) {
           return (
             <div className={`att-chip${s === 'present' ? ' present' : s === 'absent' ? ' absent' : ''}`} key={name}>
               <span className="att-name">{name}</span>
-              <span className="att-boxes">
-                <button
-                  type="button"
-                  className={`att-box check${s === 'present' ? ' active' : ''}`}
-                  onClick={() => toggle(name, 'present')}
-                  title="มา"
-                >✓</button>
-                <button
-                  type="button"
-                  className={`att-box cross${s === 'absent' ? ' active' : ''}`}
-                  onClick={() => toggle(name, 'absent')}
-                  title="ขาด"
-                >✕</button>
-              </span>
+              {isAdmin ? (
+                <span className="att-boxes">
+                  <button
+                    type="button"
+                    className={`att-box check${s === 'present' ? ' active' : ''}`}
+                    onClick={() => toggle(name, 'present')}
+                    title="มา"
+                  >✓</button>
+                  <button
+                    type="button"
+                    className={`att-box cross${s === 'absent' ? ' active' : ''}`}
+                    onClick={() => toggle(name, 'absent')}
+                    title="ขาด"
+                  >✕</button>
+                </span>
+              ) : (
+                <span className="att-boxes att-boxes-readonly">
+                  {s === 'present' ? '✓' : s === 'absent' ? '✕' : '–'}
+                </span>
+              )}
             </div>
           );
         })}
@@ -193,11 +201,13 @@ export default function AttendanceBoard({ initialData, today }) {
 
       {error && <div className="sync-error">{error}</div>}
 
-      <div className="save-bar">
-        <button type="button" className="save-btn" onClick={handleSave} disabled={busy}>
-          {busy ? 'กำลังบันทึก...' : 'บันทึกการเช็คชื่อ'}
-        </button>
-      </div>
+      {isAdmin && (
+        <div className="save-bar">
+          <button type="button" className="save-btn" onClick={handleSave} disabled={busy}>
+            {busy ? 'กำลังบันทึก...' : 'บันทึกการเช็คชื่อ'}
+          </button>
+        </div>
+      )}
 
       <footer id="storage-note">{note}</footer>
     </>

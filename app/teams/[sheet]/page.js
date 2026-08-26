@@ -1,6 +1,7 @@
 import { readTeams, listSections } from '@/lib/teams';
 import { readGearMap, applyGearMap } from '@/lib/gear';
 import { buildNameToClass } from '@/lib/nameToColor';
+import { isAdmin } from '@/lib/auth';
 import TeamGrid from '@/components/TeamGrid';
 import SetupNotice from '@/components/SetupNotice';
 
@@ -14,6 +15,7 @@ export default async function TeamSheetPage({ params }) {
   let sectionLabels = [];
   let nameToClass = {};
   let error = null;
+  const admin = await isAdmin();
   try {
     teams = applyGearMap(await readTeams(title), await readGearMap());
     sectionLabels = await listSections(title);
@@ -30,7 +32,7 @@ export default async function TeamSheetPage({ params }) {
           {teams ? `${teams.length} ทีม · ${teams.reduce((n, t) => n + t.members.length, 0)} คน` : ''}
         </p>
       </header>
-      {error ? <SetupNotice type={error} /> : <TeamGrid sheetTitle={title} initialTeams={teams} sectionLabels={sectionLabels} nameToClass={nameToClass} />}
+      {error ? <SetupNotice type={error} /> : <TeamGrid sheetTitle={title} initialTeams={teams} sectionLabels={sectionLabels} nameToClass={nameToClass} isAdmin={admin} />}
     </main>
   );
 }
