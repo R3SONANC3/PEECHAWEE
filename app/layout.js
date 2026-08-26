@@ -37,6 +37,16 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="th" className={`${notoSans.variable} ${notoSerif.variable}`}>
+      <head>
+        {/* Applies a saved theme choice before first paint, so switching
+            pages/reloading never flashes the wrong theme. No saved choice =
+            no attribute set = CSS falls through to prefers-color-scheme. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}`,
+          }}
+        />
+      </head>
       <body>
         <div className="wrap">
           <RoleGate isAdmin={admin}>

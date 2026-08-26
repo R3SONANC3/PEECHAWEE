@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const BASE_LINKS = [
   { href: '/', label: '🏰 ทำเนียบสมาชิก' },
@@ -10,10 +11,23 @@ const BASE_LINKS = [
 
 export default function Nav({ teamSheets = [], isAdmin }) {
   const pathname = usePathname();
+  const [theme, setTheme] = useState(null); // unknown until mounted, avoids SSR mismatch
   const links = [
     ...BASE_LINKS,
     ...teamSheets.map((title) => ({ href: `/teams/${encodeURIComponent(title)}`, label: `⚔️ ${title}` })),
   ];
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    setTheme(saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    setTheme(next);
+  }
 
   async function switchRole() {
     if (isAdmin) await fetch('/api/auth', { method: 'DELETE' });
@@ -28,6 +42,9 @@ export default function Nav({ teamSheets = [], isAdmin }) {
           {l.label}
         </Link>
       ))}
+      <button type="button" className="nav-theme-toggle" onClick={toggleTheme} title="สลับธีม">
+        {theme === 'dark' ? '☀️' : theme === 'light' ? '🌙' : ''}
+      </button>
       <button type="button" className="nav-role-switch" onClick={switchRole} title="เปลี่ยนโหมด">
         {isAdmin ? '🛡️ ผู้บริหาร' : '👤 Member'}
       </button>

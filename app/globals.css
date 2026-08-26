@@ -1,5 +1,5 @@
 :root {
-  --bg: #f5f6fa;
+  --bg: #f7f8fb;
   --bg-card: #ffffff;
   --border: #e3e6ee;
   --border-soft: #edeff5;
@@ -12,8 +12,56 @@
   --danger: #dc2626;
   --danger-soft: #fdeceb;
   --ok: #16a34a;
+  --ok-soft: #f0fdf4;
   --radius: 12px;
   --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 2px 6px rgba(16, 24, 40, 0.06);
+  --shadow-lg: 0 12px 28px rgba(16, 24, 40, .12);
+  color-scheme: light;
+}
+
+/* Dark theme: system preference (no explicit choice) or explicit toggle.
+   Values mirror the light set above 1:1 — never define a color only in
+   one of these two blocks, or the toggle direction that isn't tested
+   silently falls back to light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #13141c;
+    --bg-card: #1c1e29;
+    --border: #2d3040;
+    --border-soft: #262837;
+    --text: #e7e8f0;
+    --text-dim: #9599ad;
+    --text-faint: #676b80;
+    --accent: #8b85f5;
+    --accent-soft: #262441;
+    --accent-dim: #b4b0fa;
+    --danger: #f87171;
+    --danger-soft: #3a1a1c;
+    --ok: #4ade80;
+    --ok-soft: #16261c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 2px 10px rgba(0, 0, 0, .5);
+    --shadow-lg: 0 16px 36px rgba(0, 0, 0, .55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #13141c;
+  --bg-card: #1c1e29;
+  --border: #2d3040;
+  --border-soft: #262837;
+  --text: #e7e8f0;
+  --text-dim: #9599ad;
+  --text-faint: #676b80;
+  --accent: #8b85f5;
+  --accent-soft: #262441;
+  --accent-dim: #b4b0fa;
+  --danger: #f87171;
+  --danger-soft: #3a1a1c;
+  --ok: #4ade80;
+  --ok-soft: #16261c;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 2px 10px rgba(0, 0, 0, .5);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, .55);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -23,6 +71,7 @@ body {
   color: var(--text);
   font-family: var(--font-sans), 'Noto Sans Thai', sans-serif;
   min-height: 100vh;
+  transition: background-color .15s ease, color .15s ease;
 }
 h1, h2, .panel-title, .team-head, .modal-title {
   font-family: var(--font-serif), 'Noto Serif Thai', serif;
@@ -45,8 +94,14 @@ button { font-family: inherit; }
 }
 .nav-link:hover { background: var(--border-soft); color: var(--text); }
 .nav-link.active { background: var(--accent); color: #fff; }
+.nav-theme-toggle {
+  flex-shrink: 0; margin-left: auto; width: 38px; height: 38px; font-size: 15px;
+  background: var(--border-soft); border: none; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: background-color .15s;
+}
+.nav-theme-toggle:hover { background: var(--accent-soft); }
 .nav-role-switch {
-  flex-shrink: 0; margin-left: auto; white-space: nowrap; font-size: 13px; font-weight: 600;
+  flex-shrink: 0; white-space: nowrap; font-size: 13px; font-weight: 600;
   color: var(--text-dim); background: var(--border-soft); border: none; border-radius: 999px;
   padding: 9px 16px; cursor: pointer;
 }
@@ -59,14 +114,14 @@ button { font-family: inherit; }
   box-shadow: var(--shadow); padding: 32px; width: 100%; max-width: 400px; text-align: center;
 }
 .role-gate-box input {
-  background: #fff; border: 1px solid var(--border); color: var(--text);
+  background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
   padding: 10px 12px; border-radius: 8px; font-size: 14px;
 }
 .role-gate-box input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
 .role-gate-choices { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
 .role-gate-btn {
   display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
-  background: #fff; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
   padding: 14px 16px; cursor: pointer; text-align: left;
 }
 .role-gate-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
@@ -122,7 +177,7 @@ button { font-family: inherit; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 12px; color: var(--text-dim); }
 .field input, .field select, .search-input {
-  background: #fff; border: 1px solid var(--border); color: var(--text);
+  background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
   padding: 10px 12px; border-radius: 8px; font-size: 14px; min-width: 200px;
 }
 .field select { min-width: 170px; }
@@ -166,7 +221,7 @@ button { font-family: inherit; }
 .member-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; font-size: 13.5px; color: var(--text); }
 .member-row:hover { background: var(--border-soft); }
 .member-row .gear { font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; flex-shrink: 0; }
-.member-name { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-weight: 500; position: relative; }
+.member-name { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-weight: 500; position: relative; color: var(--cc, inherit); }
 .member-icon { flex-shrink: 0; opacity: 0.85; }
 .class-badge {
   flex-shrink: 0; border: none; padding: 0; width: 20px; height: 20px; border-radius: 50%;
@@ -175,7 +230,7 @@ button { font-family: inherit; }
 button.class-badge { cursor: pointer; }
 .class-badge-popover {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: 210px;
-  background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 6px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 6px;
   box-shadow: 0 12px 28px rgba(16, 24, 40, .12);
 }
 .member-name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -190,7 +245,7 @@ button.class-badge { cursor: pointer; }
 
 .edit-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 4px; align-items: center; }
 .edit-row input, .edit-row select {
-  background: #fff; border: 1px solid var(--accent); color: var(--text);
+  background: var(--bg-card); border: 1px solid var(--accent); color: var(--text);
   padding: 6px 8px; border-radius: 6px; font-size: 13px;
 }
 .edit-row input { flex: 1 1 110px; min-width: 110px; }
@@ -223,7 +278,7 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
 .team-members { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
 .team-member { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; font-size: 15.5px; color: var(--text); }
 .team-member:hover { background: var(--border-soft); }
-.member-label { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-weight: 500; }
+.member-label { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; font-weight: 500; color: var(--cc, inherit); }
 .team-member.empty .member-label { color: var(--text-faint); font-style: italic; font-weight: 400; }
 .team-member .gear {
   font-size: 13.5px; color: var(--text-dim); font-variant-numeric: tabular-nums;
@@ -255,14 +310,14 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
   box-shadow: var(--shadow);
 }
 .date-panel label { font-size: 13px; color: var(--text-dim); }
-.date-panel input[type="date"] { background: #fff; border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 14px; }
+.date-panel input[type="date"] { background: var(--bg-card); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 14px; }
 .date-panel input[type="date"]:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
 .date-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-left: 4px; }
-.date-chip { font-size: 12px; padding: 5px 13px; border-radius: 14px; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; background: #fff; }
+.date-chip { font-size: 12px; padding: 5px 13px; border-radius: 14px; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; background: var(--bg-card); }
 .date-chip:hover { border-color: var(--accent); color: var(--accent); }
 .date-chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dim); }
 
-.sync-btn { background: #fff; border: 1px solid var(--border); color: var(--text-dim); font-size: 12px; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.sync-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-dim); font-size: 12px; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
 .sync-btn:hover { border-color: var(--accent); color: var(--accent-dim); }
 .sync-error { color: var(--danger); font-size: 12.5px; margin: 8px 0; }
 
@@ -295,7 +350,7 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
 .att-boxes-readonly { font-size: 13px; font-weight: 700; color: var(--text-faint); flex-shrink: 0; }
 .att-chip.present .att-boxes-readonly { color: var(--ok); }
 .att-chip.absent .att-boxes-readonly { color: var(--danger); }
-.att-chip.present { border-color: var(--ok); background: #f0fdf4; }
+.att-chip.present { border-color: var(--ok); background: var(--ok-soft); }
 .att-chip.absent { border-color: var(--danger); background: var(--danger-soft); }
 
 /* ---------- Attendance: save bar ---------- */
@@ -312,7 +367,7 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
 /* ---------- Search suggestions (team edit modal) ---------- */
 .search-suggestions {
   position: absolute; top: calc(100% + 6px); left: 0; right: 0;
-  background: #fff; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
   max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 12px 28px rgba(16, 24, 40, .12);
 }
 .suggestion-item { padding: 9px 14px; font-size: 13.5px; color: var(--text); cursor: pointer; }
@@ -322,11 +377,32 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
 .class-filter-chip {
   display: flex; align-items: center; justify-content: center;
   width: 30px; height: 28px; border-radius: 7px; border: 1px solid var(--border);
-  background: #fff; cursor: pointer; padding: 0;
+  background: var(--bg-card); cursor: pointer; padding: 0; color: var(--cc, inherit);
 }
 .class-filter-chip.all { width: auto; padding: 0 10px; font-size: 12px; color: var(--text-dim); }
 .class-filter-chip:hover { border-color: var(--accent); }
 .class-filter-chip.active { background: var(--accent-soft); border-color: var(--accent); }
+.class-colored-text { color: var(--cc, inherit); }
+
+/* Class colors are matched exactly to the Google Sheet's standard palette
+   (see lib/classes.js), which includes near-black/near-white values tuned
+   for a white sheet — unreadable as-is on a dark page. Elements that carry
+   a class color via the --cc custom property get lightened in dark mode
+   instead of changing the underlying color value. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .member-name,
+  :root:not([data-theme="light"]) .member-label,
+  :root:not([data-theme="light"]) .class-filter-chip:not(.all),
+  :root:not([data-theme="light"]) .class-colored-text {
+    color: color-mix(in srgb, var(--cc, currentColor) 65%, white 30%);
+  }
+}
+:root[data-theme="dark"] .member-name,
+:root[data-theme="dark"] .member-label,
+:root[data-theme="dark"] .class-filter-chip:not(.all),
+:root[data-theme="dark"] .class-colored-text {
+  color: color-mix(in srgb, var(--cc, currentColor) 65%, white 30%);
+}
 
 /* ---------- Page loading spinner ---------- */
 .page-spinner { display: flex; justify-content: center; padding: 80px 0; }
@@ -355,7 +431,7 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
   display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 300;
 }
 .modal-box {
-  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 24px; max-width: 380px; width: 100%; box-shadow: 0 24px 60px rgba(16, 24, 40, .25);
 }
 .modal-title { font-weight: 600; font-size: 17px; color: var(--text); margin-bottom: 10px; }

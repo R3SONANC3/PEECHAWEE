@@ -46,7 +46,7 @@ function ClassName({ name, clsKey }) {
   const cls = CLASS_MAP[clsKey];
   if (!cls) return <>{name}</>;
   return (
-    <span style={{ color: cls.color, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+    <span className="class-colored-text" style={{ '--cc': cls.color, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <ClassIcon icon={cls.icon} size={14} />
       {name}
     </span>

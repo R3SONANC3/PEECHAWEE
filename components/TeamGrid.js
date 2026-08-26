@@ -134,7 +134,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
                         {(() => {
                           const cls = m && CLASS_MAP[nameToClass[m.name]];
                           return (
-                            <span className="member-label" style={cls ? { color: cls.color } : undefined}>
+                            <span className="member-label" style={cls ? { '--cc': cls.color } : undefined}>
                               {cls && <ClassIcon icon={cls.icon} size={14} className="member-icon" />}
                               <span className="member-name-text">{m ? m.name : 'ว่าง'}</span>
                             </span>
@@ -183,7 +183,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
                     type="button"
                     key={c.key}
                     className={`class-filter-chip${classFilter === c.key ? ' active' : ''}`}
-                    style={{ color: c.color }}
+                    style={{ '--cc': c.color }}
                     title={c.key}
                     onClick={() => setClassFilter(classFilter === c.key ? '' : c.key)}
                   >

@@ -205,7 +205,7 @@ export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }
             const pickerOpen = isAdmin && classPickerFor?.cls === c.key && classPickerFor?.name === m;
             return (
               <li className="member-row" key={m}>
-                <span className="member-name" style={{ color: c.color }}>
+                <span className="member-name" style={{ '--cc': c.color }}>
                   {isAdmin ? (
                     <button
                       type="button"
@@ -229,7 +229,7 @@ export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }
                           type="button"
                           key={cc.key}
                           className={`class-filter-chip${cc.key === c.key ? ' active' : ''}`}
-                          style={{ color: cc.color }}
+                          style={{ '--cc': cc.color }}
                           title={cc.key}
                           onClick={() => changeClass(c.key, m, cc.key)}
                         >
