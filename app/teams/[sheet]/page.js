@@ -1,4 +1,5 @@
 import { readTeams, listSections } from '@/lib/teams';
+import { readGearMap, applyGearMap } from '@/lib/gear';
 import { buildNameToClass } from '@/lib/nameToColor';
 import TeamGrid from '@/components/TeamGrid';
 import SetupNotice from '@/components/SetupNotice';
@@ -14,7 +15,7 @@ export default async function TeamSheetPage({ params }) {
   let nameToClass = {};
   let error = null;
   try {
-    teams = await readTeams(title);
+    teams = applyGearMap(await readTeams(title), await readGearMap());
     sectionLabels = await listSections(title);
     nameToClass = await buildNameToClass();
   } catch (e) {
