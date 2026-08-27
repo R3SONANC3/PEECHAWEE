@@ -46,6 +46,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [findQuery, setFindQuery] = useState('');
+  const [findFocused, setFindFocused] = useState(false);
   const [highlightKey, setHighlightKey] = useState(null);
   const { confirm, modal } = useConfirm();
   const { toast, toastUI } = useToast();
@@ -58,9 +59,12 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [highlightKey]);
 
-  function findMe(e) {
-    e.preventDefault();
-    const q = findQuery.trim().toLowerCase();
+  const findSuggestions = findFocused && findQuery.trim()
+    ? names.filter((n) => n.toLowerCase().includes(findQuery.trim().toLowerCase())).slice(0, 8)
+    : [];
+
+  function runFind(rawQuery) {
+    const q = rawQuery.trim().toLowerCase();
     if (!q) return;
     let found = null;
     for (const team of teams) {
@@ -80,6 +84,17 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
       return;
     }
     setHighlightKey(`${found.team.key.replace(':', '-')}-${found.slot}`);
+  }
+
+  function findMe(e) {
+    e.preventDefault();
+    runFind(findQuery);
+  }
+
+  function pickFindSuggestion(n) {
+    setFindQuery(n);
+    setFindFocused(false);
+    runFind(n);
   }
 
   // Group teams by their sheet section (e.g. TOP/MID/BOT), preserving the
@@ -222,12 +237,25 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
       {toastUI}
 
       <form className="find-me-bar" onSubmit={findMe}>
-        <input
-          className="search-input"
-          value={findQuery}
-          onChange={(e) => setFindQuery(e.target.value)}
-          placeholder="ค้นหาชื่อของตัวเอง..."
-        />
+        <div style={{ position: 'relative', flex: 1 }}>
+          <input
+            className="search-input"
+            value={findQuery}
+            onChange={(e) => setFindQuery(e.target.value)}
+            onFocus={() => setFindFocused(true)}
+            onBlur={() => setTimeout(() => setFindFocused(false), 150)}
+            placeholder="ค้นหาชื่อของตัวเอง..."
+          />
+          {findSuggestions.length > 0 && (
+            <div className="search-suggestions">
+              {findSuggestions.map((n) => (
+                <div key={n} className="suggestion-item" onMouseDown={() => pickFindSuggestion(n)}>
+                  <span>{n}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         <button type="submit" className="sync-btn">ค้นหา</button>
       </form>
 
