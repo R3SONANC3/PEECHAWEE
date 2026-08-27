@@ -53,11 +53,19 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     return groups;
   }, [teams, sectionLabels]);
 
+  // Names free to pick (no ตี้/slot yet, within this sheet's duplicate
+  // group) sort above ones already assigned elsewhere; GEAR (highest
+  // first) breaks ties within each of those two groups.
   const matches = nameQuery.trim() || classFilter
     ? names
         .filter((n) => !classFilter || nameToClass[n] === classFilter)
         .filter((n) => !nameQuery.trim() || n.toLowerCase().includes(nameQuery.trim().toLowerCase()))
-        .sort((a, b) => (gearMap?.[b] ?? -1) - (gearMap?.[a] ?? -1))
+        .sort((a, b) => {
+          const aConflict = conflictFor(a) ? 1 : 0;
+          const bConflict = conflictFor(b) ? 1 : 0;
+          if (aConflict !== bConflict) return aConflict - bConflict;
+          return (gearMap?.[b] ?? -1) - (gearMap?.[a] ?? -1);
+        })
         .slice(0, 30)
     : [];
 
