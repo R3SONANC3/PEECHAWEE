@@ -14,7 +14,7 @@ async function callApi(body) {
   });
   const data = await res.json();
   if (!data.ok) throw new Error(data.error || 'unknown error');
-  return data.teams;
+  return data;
 }
 
 // Rebuilds what THIS sheet contributes to the group's assigned-name map
@@ -36,12 +36,13 @@ function mergeGroupAssignments(prev, freshTeams, forSheet) {
   return next;
 }
 
-export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass, gearMap, groupAssignments: initialGroupAssignments, isAdmin }) {
+export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass, gearMap, groupAssignments: initialGroupAssignments, importableTeams, isAdmin }) {
   const [teams, setTeams] = useState(initialTeams || []);
   const [groupAssignments, setGroupAssignments] = useState(initialGroupAssignments || {});
   const [editing, setEditing] = useState(null); // { team, slot, name, gear }
   const [nameQuery, setNameQuery] = useState('');
   const [classFilter, setClassFilter] = useState('');
+  const [importingFor, setImportingFor] = useState(null); // team object being imported into
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const { confirm, modal } = useConfirm();
@@ -125,9 +126,9 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     setBusy(true);
     setError('');
     try {
-      const updated = await callApi({ sheet: sheetTitle, team: editing.team, teamKey: editing.teamKey, slot: editing.slot, name: editing.name, gear: editing.gear });
-      setTeams(updated);
-      setGroupAssignments((prev) => mergeGroupAssignments(prev, updated, sheetTitle));
+      const data = await callApi({ sheet: sheetTitle, team: editing.team, teamKey: editing.teamKey, slot: editing.slot, name: editing.name, gear: editing.gear });
+      setTeams(data.teams);
+      setGroupAssignments((prev) => mergeGroupAssignments(prev, data.teams, sheetTitle));
       setEditing(null);
       toast('บันทึกแล้ว');
     } catch (e) {
@@ -147,10 +148,37 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     if (!ok) return;
     setBusy(true);
     try {
-      const updated = await callApi({ sheet: sheetTitle, team: team.name, teamKey: team.key, slot, name: '', gear: '' });
-      setTeams(updated);
-      setGroupAssignments((prev) => mergeGroupAssignments(prev, updated, sheetTitle));
+      const data = await callApi({ sheet: sheetTitle, team: team.name, teamKey: team.key, slot, name: '', gear: '' });
+      setTeams(data.teams);
+      setGroupAssignments((prev) => mergeGroupAssignments(prev, data.teams, sheetTitle));
       toast(`ลบ "${memberName}" ออกจากทีมแล้ว`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function doImport(sourceTeam) {
+    if (!importingFor) return;
+    setBusy(true);
+    try {
+      const data = await callApi({
+        action: 'import',
+        sheet: sheetTitle,
+        teamKey: importingFor.key,
+        sourceSheet: sourceTeam.sheet,
+        sourceTeamKey: sourceTeam.teamKey,
+      });
+      setTeams(data.teams);
+      setGroupAssignments((prev) => mergeGroupAssignments(prev, data.teams, sheetTitle));
+      setImportingFor(null);
+      if (data.skipped?.length) {
+        const names = data.skipped.map((s) => s.name).join(', ');
+        toast(`นำเข้าทีมแล้ว (ข้าม ${names} — ซ้ำในชีทนี้อยู่แล้ว)`);
+      } else {
+        toast(`นำเข้าทีม ${sourceTeam.sheet} ${sourceTeam.name} แล้ว`);
+      }
+    } catch (e) {
+      toast('นำเข้าไม่สำเร็จ: ' + e.message, 'error');
     } finally {
       setBusy(false);
     }
@@ -177,7 +205,17 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
                       <div className="team-avg">รวม {formatNum(team.total)} · เฉลี่ย {formatNum(team.average)}</div>
                     )}
                   </div>
-                  <span className="team-size">{team.members.length}/{team.slotCount}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="team-size">{team.members.length}/{team.slotCount}</span>
+                    {isAdmin && importableTeams && (
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        title="นำเข้าทั้งทีมจากทีมหลัก"
+                        onClick={() => setImportingFor(team)}
+                      >⇩</button>
+                    )}
+                  </div>
                 </div>
                 <ul className="team-members">
                   {Array.from({ length: team.slotCount }, (_, i) => {
@@ -284,6 +322,34 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
               <button type="button" className="modal-btn modal-btn-confirm" onClick={saveEdit} disabled={busy}>
                 {busy ? 'กำลังบันทึก...' : 'บันทึก'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {importingFor && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setImportingFor(null); }}>
+          <div className="modal-box">
+            <div className="modal-title">นำเข้าทั้งทีม — {importingFor.name}</div>
+            <p className="modal-message">
+              เลือกทีมจากหน้าทีมหลัก (Main-War / SUB-WAR) เพื่อคัดลอกสมาชิกทั้ง 5 ช่องมาทับที่นี่
+            </p>
+            <div className="search-suggestions" style={{ position: 'static', maxHeight: 320, marginBottom: 16 }}>
+              {(importableTeams || []).map((t) => (
+                <div
+                  key={`${t.sheet}:${t.teamKey}`}
+                  className="suggestion-item"
+                  onClick={() => doImport(t)}
+                >
+                  <span>
+                    {t.sheet} · {t.name}
+                    <span className="suggestion-conflict"> · {t.members.map((m) => m.name).join(', ') || 'ว่าง'}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="modal-btn modal-btn-cancel" onClick={() => setImportingFor(null)} disabled={busy}>ยกเลิก</button>
             </div>
           </div>
         </div>

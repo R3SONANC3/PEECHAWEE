@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readTeams, updateTeamSlot, readGroupAssignments } from '@/lib/teams';
+import { readTeams, updateTeamSlot, readGroupAssignments, importTeam } from '@/lib/teams';
 import { readGearMap, applyGearMap, setGear } from '@/lib/gear';
 import { isAdmin } from '@/lib/auth';
 
@@ -19,6 +19,11 @@ export async function POST(request) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false, error: 'ไม่มีสิทธิ์แก้ไขข้อมูล' }, { status: 401 });
   const body = await request.json();
   try {
+    if (body.action === 'import') {
+      const { teams, skipped } = await importTeam(body.sheet, body.teamKey, body.sourceSheet, body.sourceTeamKey);
+      return NextResponse.json({ ok: true, teams: applyGearMap(teams, await readGearMap()), skipped });
+    }
+
     const trimmedName = (body.name || '').trim();
     if (trimmedName) {
       const assignments = await readGroupAssignments(body.sheet);
