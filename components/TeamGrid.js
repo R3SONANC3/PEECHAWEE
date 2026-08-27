@@ -17,8 +17,28 @@ async function callApi(body) {
   return data.teams;
 }
 
-export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass, gearMap, groupAssignments, isAdmin }) {
+// Rebuilds what THIS sheet contributes to the group's assigned-name map
+// from freshly-saved team data, replacing whatever was known for this
+// sheet before while leaving other sheets' entries (still accurate — this
+// save didn't touch them) untouched. Without this, the dropdown wouldn't
+// know about a name just assigned until the page was reloaded, letting the
+// same name look "free" again for the very next edit in the same session.
+function mergeGroupAssignments(prev, freshTeams, forSheet) {
+  const next = {};
+  Object.entries(prev || {}).forEach(([name, loc]) => {
+    if (loc.sheet !== forSheet) next[name] = loc;
+  });
+  freshTeams.forEach((team) => {
+    team.members.forEach((m) => {
+      next[m.name] = { sheet: forSheet, team: team.name, slot: m.slot };
+    });
+  });
+  return next;
+}
+
+export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass, gearMap, groupAssignments: initialGroupAssignments, isAdmin }) {
   const [teams, setTeams] = useState(initialTeams || []);
+  const [groupAssignments, setGroupAssignments] = useState(initialGroupAssignments || {});
   const [editing, setEditing] = useState(null); // { team, slot, name, gear }
   const [nameQuery, setNameQuery] = useState('');
   const [classFilter, setClassFilter] = useState('');
@@ -105,6 +125,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     try {
       const updated = await callApi({ sheet: sheetTitle, team: editing.team, slot: editing.slot, name: editing.name, gear: editing.gear });
       setTeams(updated);
+      setGroupAssignments((prev) => mergeGroupAssignments(prev, updated, sheetTitle));
       setEditing(null);
       toast('บันทึกแล้ว');
     } catch (e) {
@@ -126,6 +147,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     try {
       const updated = await callApi({ sheet: sheetTitle, team, slot, name: '', gear: '' });
       setTeams(updated);
+      setGroupAssignments((prev) => mergeGroupAssignments(prev, updated, sheetTitle));
       toast(`ลบ "${memberName}" ออกจากทีมแล้ว`);
     } finally {
       setBusy(false);
