@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { readRoster, addMember, deleteMember, editMember } from '@/lib/roster';
+import { readGearMap, setGear } from '@/lib/gear';
 import { isAdmin } from '@/lib/auth';
 
 export async function GET() {
   try {
     const roster = await readRoster();
-    return NextResponse.json({ ok: true, roster });
+    const gearMap = await readGearMap();
+    return NextResponse.json({ ok: true, roster, gearMap });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e.message }, { status: 500 });
   }
@@ -22,10 +24,15 @@ export async function POST(request) {
       roster = await deleteMember(body.name, body.cls);
     } else if (body.action === 'edit') {
       roster = await editMember(body.oldName, body.oldCls, body.newName, body.newCls);
+      // A blank gear means "unchanged" — never overwrite the shared value with blank.
+      if (body.newName && body.gear !== '' && body.gear !== null && body.gear !== undefined) {
+        await setGear(body.newName.trim(), body.gear);
+      }
     } else {
       return NextResponse.json({ ok: false, error: 'unknown action' }, { status: 400 });
     }
-    return NextResponse.json({ ok: true, roster });
+    const gearMap = await readGearMap();
+    return NextResponse.json({ ok: true, roster, gearMap });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
   }

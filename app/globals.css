@@ -259,6 +259,7 @@ button.class-badge { cursor: pointer; }
 }
 .edit-row input { flex: 1 1 110px; min-width: 110px; }
 .edit-row select { flex-shrink: 0; }
+.edit-row input.edit-row-gear { flex: 0 1 80px; min-width: 80px; }
 
 footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-size: 12px; }
 

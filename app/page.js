@@ -27,7 +27,7 @@ export default async function RosterPage() {
         <h1>ทำเนียบสมาชิกกิลผีชีวะ</h1>
         <p className="subtitle">จัดการรายชื่อสมาชิก · เพิ่ม แก้ไข และลบข้อมูลตามคลาส</p>
       </header>
-      {error ? <SetupNotice type={error} /> : <RosterBoard initialRoster={roster} classes={CLASSES} gearMap={gearMap} isAdmin={admin} />}
+      {error ? <SetupNotice type={error} /> : <RosterBoard initialRoster={roster} classes={CLASSES} initialGearMap={gearMap} isAdmin={admin} />}
     </main>
   );
 }

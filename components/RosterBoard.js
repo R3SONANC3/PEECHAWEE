@@ -13,11 +13,12 @@ async function callApi(body) {
   });
   const data = await res.json();
   if (!data.ok) throw new Error(data.error || 'unknown error');
-  return data.roster;
+  return data;
 }
 
-export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }) {
+export default function RosterBoard({ initialRoster, classes, initialGearMap, isAdmin }) {
   const [roster, setRoster] = useState(initialRoster);
+  const [gearMap, setGearMap] = useState(initialGearMap || {});
   const [query, setQuery] = useState('');
   const [name, setName] = useState('');
   const [cls, setCls] = useState(classes[0].key);
@@ -26,6 +27,7 @@ export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }
   const [editing, setEditing] = useState(null); // { cls, name }
   const [editName, setEditName] = useState('');
   const [editCls, setEditCls] = useState('');
+  const [editGear, setEditGear] = useState('');
   const [classPickerFor, setClassPickerFor] = useState(null); // { cls, name }
   const { confirm, modal } = useConfirm();
   const { toast, toastUI } = useToast();
@@ -44,8 +46,9 @@ export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }
     setFormMsg('');
     setBusy(true);
     try {
-      const updated = await callApi({ action: 'add', name: trimmed, cls });
-      setRoster(updated);
+      const data = await callApi({ action: 'add', name: trimmed, cls });
+      setRoster(data.roster);
+      setGearMap(data.gearMap);
       setName('');
       toast(`เพิ่ม "${trimmed}" แล้ว`);
     } catch (err) {
@@ -65,8 +68,8 @@ export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }
     if (!ok) return;
     setBusy(true);
     try {
-      const updated = await callApi({ action: 'delete', name: memberName, cls: clsKey });
-      setRoster(updated);
+      const data = await callApi({ action: 'delete', name: memberName, cls: clsKey });
+      setRoster(data.roster);
       toast(`ลบ "${memberName}" แล้ว`);
     } finally {
       setBusy(false);
@@ -77,6 +80,7 @@ export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }
     setEditing({ cls: clsKey, name: memberName });
     setEditName(memberName);
     setEditCls(clsKey);
+    setEditGear(gearMap?.[memberName] ?? '');
   }
 
   async function saveEdit() {
@@ -85,14 +89,16 @@ export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }
     if (!trimmed) return;
     setBusy(true);
     try {
-      const updated = await callApi({
+      const data = await callApi({
         action: 'edit',
         oldName: editing.name,
         oldCls: editing.cls,
         newName: trimmed,
         newCls: editCls,
+        gear: editGear,
       });
-      setRoster(updated);
+      setRoster(data.roster);
+      setGearMap(data.gearMap);
       setEditing(null);
       toast('บันทึกการแก้ไขแล้ว');
     } finally {
@@ -105,8 +111,8 @@ export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }
     if (newCls === oldCls) return;
     setBusy(true);
     try {
-      const updated = await callApi({ action: 'edit', oldName: memberName, oldCls, newName: memberName, newCls });
-      setRoster(updated);
+      const data = await callApi({ action: 'edit', oldName: memberName, oldCls, newName: memberName, newCls });
+      setRoster(data.roster);
       toast(`ย้าย "${memberName}" ไป ${newCls} แล้ว`);
     } finally {
       setBusy(false);
@@ -197,6 +203,14 @@ export default function RosterBoard({ initialRoster, classes, gearMap, isAdmin }
                   <select value={editCls} onChange={(e) => setEditCls(e.target.value)}>
                     {classes.map((cc) => <option key={cc.key} value={cc.key}>{cc.key}</option>)}
                   </select>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    className="edit-row-gear"
+                    value={editGear}
+                    onChange={(e) => setEditGear(e.target.value)}
+                    placeholder="GEAR"
+                  />
                   <button type="button" className="icon-btn" onClick={saveEdit} title="บันทึก">✓</button>
                   <button type="button" className="icon-btn del" onClick={() => setEditing(null)} title="ยกเลิก">✕</button>
                 </li>
