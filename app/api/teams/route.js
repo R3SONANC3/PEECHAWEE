@@ -23,7 +23,7 @@ export async function POST(request) {
     if (trimmedName) {
       const assignments = await readGroupAssignments(body.sheet);
       const existing = assignments[trimmedName];
-      const isSameSlot = existing && existing.sheet === body.sheet && existing.team === body.team && existing.slot === Number(body.slot);
+      const isSameSlot = existing && existing.sheet === body.sheet && existing.teamKey === body.teamKey && existing.slot === Number(body.slot);
       if (existing && !isSameSlot) {
         return NextResponse.json(
           { ok: false, error: `"${trimmedName}" ถูกจัดอยู่แล้วที่ ${existing.sheet} · ${existing.team} · ช่องที่ ${existing.slot}` },
@@ -31,7 +31,7 @@ export async function POST(request) {
         );
       }
     }
-    await updateTeamSlot(body.sheet, body.team, body.slot, body.name);
+    await updateTeamSlot(body.sheet, body.teamKey, body.slot, body.name);
     // A blank gear on submit means "unchanged" (e.g. re-assigning a known
     // name to a new slot without retyping their gear) — never overwrite
     // the shared value with blank.

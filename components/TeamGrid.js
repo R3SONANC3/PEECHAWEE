@@ -30,7 +30,7 @@ function mergeGroupAssignments(prev, freshTeams, forSheet) {
   });
   freshTeams.forEach((team) => {
     team.members.forEach((m) => {
-      next[m.name] = { sheet: forSheet, team: team.name, slot: m.slot };
+      next[m.name] = { sheet: forSheet, team: team.name, teamKey: team.key, slot: m.slot };
     });
   });
   return next;
@@ -90,7 +90,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     : [];
 
   function openEdit(team, slot, member) {
-    setEditing({ team, slot, name: member?.name || '', gear: member?.gear ?? '' });
+    setEditing({ team: team.name, teamKey: team.key, slot, name: member?.name || '', gear: member?.gear ?? '' });
     setNameQuery('');
     setClassFilter('');
     setError('');
@@ -99,11 +99,13 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
   // Where `n` is already assigned within this sheet's duplicate-check group
   // (Main-War+SUB-WAR share one pool; Polarity and Castle each have their
   // own) — null if free, or if the only "conflict" is the exact slot
-  // currently being edited (so re-picking yourself isn't blocked).
+  // currently being edited (so re-picking yourself isn't blocked). Compared
+  // by teamKey (row+col), not team name — a sheet can have more than one
+  // team named e.g. "TEAM1" (Polarity's star/normal rooms both do).
   function conflictFor(n) {
     const loc = groupAssignments?.[n];
     if (!loc || !editing) return loc || null;
-    if (loc.sheet === sheetTitle && loc.team === editing.team && loc.slot === editing.slot) return null;
+    if (loc.sheet === sheetTitle && loc.teamKey === editing.teamKey && loc.slot === editing.slot) return null;
     return loc;
   }
 
@@ -123,7 +125,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     setBusy(true);
     setError('');
     try {
-      const updated = await callApi({ sheet: sheetTitle, team: editing.team, slot: editing.slot, name: editing.name, gear: editing.gear });
+      const updated = await callApi({ sheet: sheetTitle, team: editing.team, teamKey: editing.teamKey, slot: editing.slot, name: editing.name, gear: editing.gear });
       setTeams(updated);
       setGroupAssignments((prev) => mergeGroupAssignments(prev, updated, sheetTitle));
       setEditing(null);
@@ -138,14 +140,14 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
   async function removeMember(team, slot, memberName) {
     const ok = await confirm({
       title: 'ลบสมาชิกออกจากทีม',
-      message: `ต้องการลบ "${memberName}" ออกจาก ${team} ช่องที่ ${slot} ใช่หรือไม่?`,
+      message: `ต้องการลบ "${memberName}" ออกจาก ${team.name} ช่องที่ ${slot} ใช่หรือไม่?`,
       confirmText: 'ลบ',
       danger: true,
     });
     if (!ok) return;
     setBusy(true);
     try {
-      const updated = await callApi({ sheet: sheetTitle, team, slot, name: '', gear: '' });
+      const updated = await callApi({ sheet: sheetTitle, team: team.name, teamKey: team.key, slot, name: '', gear: '' });
       setTeams(updated);
       setGroupAssignments((prev) => mergeGroupAssignments(prev, updated, sheetTitle));
       toast(`ลบ "${memberName}" ออกจากทีมแล้ว`);
@@ -167,7 +169,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
           ) : (
           <div className="team-grid">
             {sectionGroup.teams.map((team) => (
-              <div className="team-card" key={team.name}>
+              <div className="team-card" key={team.key}>
                 <div className="team-head">
                   <div>
                     <div>{team.name}</div>
@@ -196,8 +198,8 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
                         {m && m.gear !== null && <span className="gear">{formatNum(m.gear)}</span>}
                         {isAdmin && (
                           <span className="slot-actions">
-                            <button type="button" className="icon-btn" onClick={() => openEdit(team.name, slot, m)} title={m ? 'แก้ไข' : 'เพิ่มชื่อ'}>✎</button>
-                            {m && <button type="button" className="icon-btn del" onClick={() => removeMember(team.name, slot, m.name)} title="ลบ">✕</button>}
+                            <button type="button" className="icon-btn" onClick={() => openEdit(team, slot, m)} title={m ? 'แก้ไข' : 'เพิ่มชื่อ'}>✎</button>
+                            {m && <button type="button" className="icon-btn del" onClick={() => removeMember(team, slot, m.name)} title="ลบ">✕</button>}
                           </span>
                         )}
                       </li>
