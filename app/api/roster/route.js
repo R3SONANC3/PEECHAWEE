@@ -20,6 +20,9 @@ export async function POST(request) {
     let roster;
     if (body.action === 'add') {
       roster = await addMember(body.name, body.cls);
+      if (body.gear !== '' && body.gear !== null && body.gear !== undefined) {
+        await setGear(body.name.trim(), body.gear);
+      }
     } else if (body.action === 'delete') {
       roster = await deleteMember(body.name, body.cls);
       // Attendance drops the same name automatically on its next load

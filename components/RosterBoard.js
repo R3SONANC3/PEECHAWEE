@@ -22,6 +22,7 @@ export default function RosterBoard({ initialRoster, classes, initialGearMap, is
   const [query, setQuery] = useState('');
   const [name, setName] = useState('');
   const [cls, setCls] = useState(classes[0].key);
+  const [gear, setGear] = useState('');
   const [busy, setBusy] = useState(false);
   const [formMsg, setFormMsg] = useState('');
   const [editing, setEditing] = useState(null); // { cls, name }
@@ -46,10 +47,11 @@ export default function RosterBoard({ initialRoster, classes, initialGearMap, is
     setFormMsg('');
     setBusy(true);
     try {
-      const data = await callApi({ action: 'add', name: trimmed, cls });
+      const data = await callApi({ action: 'add', name: trimmed, cls, gear });
       setRoster(data.roster);
       setGearMap(data.gearMap);
       setName('');
+      setGear('');
       toast(`เพิ่ม "${trimmed}" แล้ว`);
     } catch (err) {
       setFormMsg('เพิ่มไม่สำเร็จ: ' + err.message);
@@ -163,6 +165,18 @@ export default function RosterBoard({ initialRoster, classes, initialGearMap, is
               <select id="classInput" value={cls} onChange={(e) => setCls(e.target.value)}>
                 {classes.map((c) => <option key={c.key} value={c.key}>{c.key} · {c.th}</option>)}
               </select>
+            </div>
+            <div className="field">
+              <label htmlFor="gearInput">ค่าพลัง (GEAR)</label>
+              <input
+                id="gearInput"
+                type="number"
+                inputMode="numeric"
+                value={gear}
+                onChange={(e) => setGear(e.target.value)}
+                placeholder="เช่น 21000"
+                style={{ minWidth: 120 }}
+              />
             </div>
             <button type="submit" className="btn btn-add" disabled={busy}>
               {busy ? 'กำลังเพิ่ม...' : '+ เพิ่มสมาชิก'}
