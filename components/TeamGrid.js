@@ -57,6 +57,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     ? names
         .filter((n) => !classFilter || nameToClass[n] === classFilter)
         .filter((n) => !nameQuery.trim() || n.toLowerCase().includes(nameQuery.trim().toLowerCase()))
+        .sort((a, b) => (gearMap?.[b] ?? -1) - (gearMap?.[a] ?? -1))
         .slice(0, 30)
     : [];
 
@@ -204,7 +205,10 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
               {matches.length > 0 && (
                 <div className="search-suggestions">
                   {matches.map((n) => (
-                    <div key={n} className="suggestion-item" onClick={() => pickName(n)}>{n}</div>
+                    <div key={n} className="suggestion-item" onClick={() => pickName(n)}>
+                      <span>{n}</span>
+                      {gearMap?.[n] !== undefined && <span className="gear">{formatNum(gearMap[n])}</span>}
+                    </div>
                   ))}
                 </div>
               )}

@@ -380,8 +380,12 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
   background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
   max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 12px 28px rgba(16, 24, 40, .12);
 }
-.suggestion-item { padding: 9px 14px; font-size: 13.5px; color: var(--text); cursor: pointer; }
+.suggestion-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 9px 14px; font-size: 13.5px; color: var(--text); cursor: pointer;
+}
 .suggestion-item:hover { background: var(--accent-soft); }
+.suggestion-item .gear { font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
 .class-filter-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
 .class-filter-chip {
