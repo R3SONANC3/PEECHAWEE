@@ -35,6 +35,11 @@ export async function POST(request) {
       if (body.newName && body.gear !== '' && body.gear !== null && body.gear !== undefined) {
         await setGear(body.newName.trim(), body.gear);
       }
+      // A rename leaves the old name's row behind as an orphan otherwise —
+      // nothing looks it up again, but it lingers in the Gear sheet forever.
+      if (body.newName && body.newName.trim() !== body.oldName) {
+        await deleteGear(body.oldName);
+      }
     } else {
       return NextResponse.json({ ok: false, error: 'unknown action' }, { status: 400 });
     }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readTeams, updateTeamSlot, readGroupAssignments, importTeam } from '@/lib/teams';
+import { readTeams, updateTeamSlot, importTeam } from '@/lib/teams';
 import { readGearMap, applyGearMap, setGear } from '@/lib/gear';
 import { isAdmin } from '@/lib/auth';
 
@@ -24,18 +24,6 @@ export async function POST(request) {
       return NextResponse.json({ ok: true, teams: applyGearMap(teams, await readGearMap()), skipped });
     }
 
-    const trimmedName = (body.name || '').trim();
-    if (trimmedName) {
-      const assignments = await readGroupAssignments(body.sheet);
-      const existing = assignments[trimmedName];
-      const isSameSlot = existing && existing.sheet === body.sheet && existing.teamKey === body.teamKey && existing.slot === Number(body.slot);
-      if (existing && !isSameSlot) {
-        return NextResponse.json(
-          { ok: false, error: `"${trimmedName}" ถูกจัดอยู่แล้วที่ ${existing.sheet} · ${existing.team} · ช่องที่ ${existing.slot}` },
-          { status: 409 }
-        );
-      }
-    }
     await updateTeamSlot(body.sheet, body.teamKey, body.slot, body.name);
     // A blank gear on submit means "unchanged" (e.g. re-assigning a known
     // name to a new slot without retyping their gear) — never overwrite
@@ -46,6 +34,7 @@ export async function POST(request) {
     const teams = applyGearMap(await readTeams(body.sheet), await readGearMap());
     return NextResponse.json({ ok: true, teams });
   } catch (e) {
-    return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
+    const status = e.code === 'DUPLICATE_NAME' ? 409 : 400;
+    return NextResponse.json({ ok: false, error: e.message }, { status });
   }
 }
