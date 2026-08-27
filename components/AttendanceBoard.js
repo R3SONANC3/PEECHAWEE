@@ -16,7 +16,7 @@ function todayLabel() {
   return `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
 }
 
-export default function AttendanceBoard({ initialData, today, isAdmin }) {
+export default function AttendanceBoard({ initialData, today, isAdmin, war }) {
   const [names, setNames] = useState(initialData.names);
   const [dates, setDates] = useState(initialData.dates);
   const [currentDate, setCurrentDate] = useState(initialData.date || today);
@@ -48,7 +48,7 @@ export default function AttendanceBoard({ initialData, today, isAdmin }) {
     setBusy(true);
     setError('');
     try {
-      const res = await fetch(`/api/attendance?date=${encodeURIComponent(dateLabel)}`);
+      const res = await fetch(`/api/attendance?war=${war}&date=${encodeURIComponent(dateLabel)}`);
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'unknown error');
       setNames(data.names);
@@ -101,7 +101,7 @@ export default function AttendanceBoard({ initialData, today, isAdmin }) {
       const res = await fetch('/api/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: currentDate, records: statuses }),
+        body: JSON.stringify({ war, date: currentDate, records: statuses }),
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'unknown error');

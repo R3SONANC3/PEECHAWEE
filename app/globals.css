@@ -107,6 +107,19 @@ button { font-family: inherit; }
 }
 .nav-role-switch:hover { background: var(--accent-soft); color: var(--accent-dim); }
 
+/* ---------- War tabs (attendance page) ---------- */
+.war-tabs {
+  display: inline-flex; gap: 6px; margin-bottom: 18px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 999px;
+  padding: 6px; box-shadow: var(--shadow);
+}
+.war-tab {
+  text-decoration: none; font-size: 13.5px; font-weight: 600; color: var(--text-dim);
+  padding: 8px 20px; border-radius: 999px; transition: all .15s;
+}
+.war-tab:hover { background: var(--border-soft); color: var(--text); }
+.war-tab.active { background: var(--accent); color: #fff; }
+
 /* ---------- Role gate (Member / ผู้บริหาร) ---------- */
 .role-gate { display: flex; align-items: center; justify-content: center; min-height: 70vh; }
 .role-gate-box {
