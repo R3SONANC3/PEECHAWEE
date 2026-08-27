@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useConfirm } from './useConfirm';
 import { useToast } from './useToast';
 import ClassIcon from './ClassIcon';
@@ -45,10 +45,42 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
   const [importingFor, setImportingFor] = useState(null); // team object being imported into
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [findQuery, setFindQuery] = useState('');
+  const [highlightKey, setHighlightKey] = useState(null);
   const { confirm, modal } = useConfirm();
   const { toast, toastUI } = useToast();
 
   const names = useMemo(() => Object.keys(nameToClass || {}), [nameToClass]);
+
+  useEffect(() => {
+    if (!highlightKey) return;
+    const el = document.getElementById(`member-${highlightKey}`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [highlightKey]);
+
+  function findMe(e) {
+    e.preventDefault();
+    const q = findQuery.trim().toLowerCase();
+    if (!q) return;
+    let found = null;
+    for (const team of teams) {
+      for (const m of team.members) {
+        if (m.name.toLowerCase() === q) { found = { team, slot: m.slot }; break; }
+      }
+      if (found) break;
+    }
+    if (!found) {
+      for (const team of teams) {
+        const m = team.members.find((mm) => mm.name.toLowerCase().includes(q));
+        if (m) { found = { team, slot: m.slot }; break; }
+      }
+    }
+    if (!found) {
+      toast('ไม่พบชื่อนี้ในหน้านี้', 'error');
+      return;
+    }
+    setHighlightKey(`${found.team.key.replace(':', '-')}-${found.slot}`);
+  }
 
   // Group teams by their sheet section (e.g. TOP/MID/BOT), preserving the
   // order they already come in from the server. Sheets with no section
@@ -189,6 +221,16 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
       {modal}
       {toastUI}
 
+      <form className="find-me-bar" onSubmit={findMe}>
+        <input
+          className="search-input"
+          value={findQuery}
+          onChange={(e) => setFindQuery(e.target.value)}
+          placeholder="ค้นหาชื่อของตัวเอง..."
+        />
+        <button type="submit" className="sync-btn">ค้นหา</button>
+      </form>
+
       {sections.map((sectionGroup) => (
         <div className="team-section" key={sectionGroup.label || '_'}>
           {sectionGroup.label && <h2 className="section-title">{sectionGroup.label}</h2>}
@@ -221,8 +263,13 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
                   {Array.from({ length: team.slotCount }, (_, i) => {
                     const slot = i + 1;
                     const m = team.members.find((mm) => mm.slot === slot);
+                    const memberId = `${team.key.replace(':', '-')}-${slot}`;
                     return (
-                      <li className={`team-member${m ? '' : ' empty'}`} key={slot}>
+                      <li
+                        className={`team-member${m ? '' : ' empty'}${highlightKey === memberId ? ' highlighted' : ''}`}
+                        id={`member-${memberId}`}
+                        key={slot}
+                      >
                         <span className="slot-num">{slot}</span>
                         {(() => {
                           const cls = m && CLASS_MAP[nameToClass[m.name]];
