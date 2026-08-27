@@ -74,6 +74,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     const knownGear = gearMap?.[n];
     setEditing((prev) => ({ ...prev, name: n, gear: knownGear !== undefined ? knownGear : prev.gear }));
     setNameQuery('');
+    setClassFilter('');
   }
 
   async function saveEdit() {
