@@ -17,7 +17,7 @@ async function callApi(body) {
   return data.teams;
 }
 
-export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass, isAdmin }) {
+export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass, gearMap, isAdmin }) {
   const [teams, setTeams] = useState(initialTeams || []);
   const [editing, setEditing] = useState(null); // { team, slot, name, gear }
   const [nameQuery, setNameQuery] = useState('');
@@ -65,6 +65,15 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     setNameQuery('');
     setClassFilter('');
     setError('');
+  }
+
+  // Picking a known name pulls in their GEAR from the shared sheet if
+  // there's already a value on record, so re-assigning someone doesn't
+  // require re-typing a number that's already known.
+  function pickName(n) {
+    const knownGear = gearMap?.[n];
+    setEditing((prev) => ({ ...prev, name: n, gear: knownGear !== undefined ? knownGear : prev.gear }));
+    setNameQuery('');
   }
 
   async function saveEdit() {
@@ -194,7 +203,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
               {matches.length > 0 && (
                 <div className="search-suggestions">
                   {matches.map((n) => (
-                    <div key={n} className="suggestion-item" onClick={() => { setEditing({ ...editing, name: n }); setNameQuery(''); }}>{n}</div>
+                    <div key={n} className="suggestion-item" onClick={() => pickName(n)}>{n}</div>
                   ))}
                 </div>
               )}

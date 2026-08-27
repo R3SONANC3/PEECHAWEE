@@ -14,10 +14,12 @@ export default async function TeamSheetPage({ params }) {
   let teams = null;
   let sectionLabels = [];
   let nameToClass = {};
+  let gearMap = {};
   let error = null;
   const admin = await isAdmin();
   try {
-    teams = applyGearMap(await readTeams(title), await readGearMap());
+    gearMap = await readGearMap();
+    teams = applyGearMap(await readTeams(title), gearMap);
     sectionLabels = await listSections(title);
     nameToClass = await buildNameToClass();
   } catch (e) {
@@ -32,7 +34,7 @@ export default async function TeamSheetPage({ params }) {
           {teams ? `${teams.length} ทีม · ${teams.reduce((n, t) => n + t.members.length, 0)} คน` : ''}
         </p>
       </header>
-      {error ? <SetupNotice type={error} /> : <TeamGrid sheetTitle={title} initialTeams={teams} sectionLabels={sectionLabels} nameToClass={nameToClass} isAdmin={admin} />}
+      {error ? <SetupNotice type={error} /> : <TeamGrid sheetTitle={title} initialTeams={teams} sectionLabels={sectionLabels} nameToClass={nameToClass} gearMap={gearMap} isAdmin={admin} />}
     </main>
   );
 }
