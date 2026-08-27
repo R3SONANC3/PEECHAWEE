@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readRoster, addMember, deleteMember, editMember } from '@/lib/roster';
-import { readGearMap, setGear } from '@/lib/gear';
+import { readGearMap, setGear, deleteGear } from '@/lib/gear';
 import { isAdmin } from '@/lib/auth';
 
 export async function GET() {
@@ -22,6 +22,10 @@ export async function POST(request) {
       roster = await addMember(body.name, body.cls);
     } else if (body.action === 'delete') {
       roster = await deleteMember(body.name, body.cls);
+      // Attendance drops the same name automatically on its next load
+      // (syncNamesFromRoster rebuilds its name list from the roster) — GEAR
+      // has no such self-cleaning, so it needs an explicit delete here.
+      await deleteGear(body.name);
     } else if (body.action === 'edit') {
       roster = await editMember(body.oldName, body.oldCls, body.newName, body.newCls);
       // A blank gear means "unchanged" — never overwrite the shared value with blank.
