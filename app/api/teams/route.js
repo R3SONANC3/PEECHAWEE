@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readTeams, updateTeamSlot } from '@/lib/teams';
+import { readTeams, updateTeamSlot, readGroupAssignments } from '@/lib/teams';
 import { readGearMap, applyGearMap, setGear } from '@/lib/gear';
 import { isAdmin } from '@/lib/auth';
 
@@ -19,6 +19,18 @@ export async function POST(request) {
   if (!(await isAdmin())) return NextResponse.json({ ok: false, error: 'ไม่มีสิทธิ์แก้ไขข้อมูล' }, { status: 401 });
   const body = await request.json();
   try {
+    const trimmedName = (body.name || '').trim();
+    if (trimmedName) {
+      const assignments = await readGroupAssignments(body.sheet);
+      const existing = assignments[trimmedName];
+      const isSameSlot = existing && existing.sheet === body.sheet && existing.team === body.team && existing.slot === Number(body.slot);
+      if (existing && !isSameSlot) {
+        return NextResponse.json(
+          { ok: false, error: `"${trimmedName}" ถูกจัดอยู่แล้วที่ ${existing.sheet} · ${existing.team} · ช่องที่ ${existing.slot}` },
+          { status: 409 }
+        );
+      }
+    }
     await updateTeamSlot(body.sheet, body.team, body.slot, body.name);
     // A blank gear on submit means "unchanged" (e.g. re-assigning a known
     // name to a new slot without retyping their gear) — never overwrite

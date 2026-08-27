@@ -17,7 +17,7 @@ async function callApi(body) {
   return data.teams;
 }
 
-export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass, gearMap, isAdmin }) {
+export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, nameToClass, gearMap, groupAssignments, isAdmin }) {
   const [teams, setTeams] = useState(initialTeams || []);
   const [editing, setEditing] = useState(null); // { team, slot, name, gear }
   const [nameQuery, setNameQuery] = useState('');
@@ -68,10 +68,22 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     setError('');
   }
 
+  // Where `n` is already assigned within this sheet's duplicate-check group
+  // (Main-War+SUB-WAR share one pool; Polarity and Castle each have their
+  // own) — null if free, or if the only "conflict" is the exact slot
+  // currently being edited (so re-picking yourself isn't blocked).
+  function conflictFor(n) {
+    const loc = groupAssignments?.[n];
+    if (!loc || !editing) return loc || null;
+    if (loc.sheet === sheetTitle && loc.team === editing.team && loc.slot === editing.slot) return null;
+    return loc;
+  }
+
   // Picking a known name pulls in their GEAR from the shared sheet if
   // there's already a value on record, so re-assigning someone doesn't
   // require re-typing a number that's already known.
   function pickName(n) {
+    if (conflictFor(n)) return;
     const knownGear = gearMap?.[n];
     setEditing((prev) => ({ ...prev, name: n, gear: knownGear !== undefined ? knownGear : prev.gear }));
     setNameQuery('');
@@ -204,12 +216,23 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
               </div>
               {matches.length > 0 && (
                 <div className="search-suggestions">
-                  {matches.map((n) => (
-                    <div key={n} className="suggestion-item" onClick={() => pickName(n)}>
-                      <span>{n}</span>
-                      {gearMap?.[n] !== undefined && <span className="gear">{formatNum(gearMap[n])}</span>}
-                    </div>
-                  ))}
+                  {matches.map((n) => {
+                    const conflict = conflictFor(n);
+                    return (
+                      <div
+                        key={n}
+                        className={`suggestion-item${conflict ? ' disabled' : ''}`}
+                        onClick={() => pickName(n)}
+                        title={conflict ? `ถูกจัดอยู่แล้วที่ ${conflict.sheet} · ${conflict.team} · ช่องที่ ${conflict.slot}` : undefined}
+                      >
+                        <span>
+                          {n}
+                          {conflict && <span className="suggestion-conflict"> · {conflict.sheet} {conflict.team}</span>}
+                        </span>
+                        {gearMap?.[n] !== undefined && <span className="gear">{formatNum(gearMap[n])}</span>}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

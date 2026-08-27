@@ -1,4 +1,4 @@
-import { readTeams, listSections } from '@/lib/teams';
+import { readTeams, listSections, readGroupAssignments } from '@/lib/teams';
 import { readGearMap, applyGearMap } from '@/lib/gear';
 import { buildNameToClass } from '@/lib/nameToColor';
 import { isAdmin } from '@/lib/auth';
@@ -15,6 +15,7 @@ export default async function TeamSheetPage({ params }) {
   let sectionLabels = [];
   let nameToClass = {};
   let gearMap = {};
+  let groupAssignments = {};
   let error = null;
   const admin = await isAdmin();
   try {
@@ -22,6 +23,7 @@ export default async function TeamSheetPage({ params }) {
     teams = applyGearMap(await readTeams(title), gearMap);
     sectionLabels = await listSections(title);
     nameToClass = await buildNameToClass();
+    groupAssignments = await readGroupAssignments(title);
   } catch (e) {
     error = e.message === 'MISSING_GOOGLE_CREDENTIALS' ? 'missing-credentials' : 'fetch-failed';
   }
@@ -34,7 +36,19 @@ export default async function TeamSheetPage({ params }) {
           {teams ? `${teams.length} ทีม · ${teams.reduce((n, t) => n + t.members.length, 0)} คน` : ''}
         </p>
       </header>
-      {error ? <SetupNotice type={error} /> : <TeamGrid sheetTitle={title} initialTeams={teams} sectionLabels={sectionLabels} nameToClass={nameToClass} gearMap={gearMap} isAdmin={admin} />}
+      {error ? (
+        <SetupNotice type={error} />
+      ) : (
+        <TeamGrid
+          sheetTitle={title}
+          initialTeams={teams}
+          sectionLabels={sectionLabels}
+          nameToClass={nameToClass}
+          gearMap={gearMap}
+          groupAssignments={groupAssignments}
+          isAdmin={admin}
+        />
+      )}
     </main>
   );
 }
