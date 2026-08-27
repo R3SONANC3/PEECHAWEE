@@ -187,7 +187,7 @@ export default function RosterBoard({ initialRoster, classes, initialGearMap, is
           const members = (roster[c.key] || [])
             .filter((n) => !q || n.toLowerCase().includes(q))
             .slice()
-            .sort((a, b) => a.localeCompare(b, 'th'));
+            .sort((a, b) => (gearMap?.[b] ?? -1) - (gearMap?.[a] ?? -1));
           // Cap 15 per column: split into however many equal-ish columns
           // that takes, rather than one long scroll for a big class.
           const colCount = Math.max(1, Math.ceil(members.length / 15));
