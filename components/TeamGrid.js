@@ -43,6 +43,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
   const [nameQuery, setNameQuery] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [importingFor, setImportingFor] = useState(null); // team object being imported into
+  const [selectedImportSource, setSelectedImportSource] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [findQuery, setFindQuery] = useState('');
@@ -226,8 +227,32 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     }
   }
 
-  async function doImport(sourceTeam) {
-    if (!importingFor) return;
+  function openImportModal(team) {
+    setImportingFor(team);
+    setSelectedImportSource(null);
+  }
+  function closeImportModal() {
+    setImportingFor(null);
+    setSelectedImportSource(null);
+  }
+
+  // A source team whose members already appear together, unchanged, on some
+  // team in THIS sheet was already imported here before — importing it
+  // again would just skip every name as a duplicate, so it's hidden from
+  // the picker instead of cluttering it with a no-op option.
+  function alreadyImportedHere(sourceTeam) {
+    const sourceNames = sourceTeam.members.map((m) => m.name).filter(Boolean);
+    if (!sourceNames.length) return false;
+    const sourceSet = new Set(sourceNames);
+    return teams.some((t) => {
+      const names = t.members.map((m) => m.name).filter(Boolean);
+      return names.length === sourceSet.size && names.every((n) => sourceSet.has(n));
+    });
+  }
+
+  async function doImport() {
+    if (!importingFor || !selectedImportSource) return;
+    const sourceTeam = selectedImportSource;
     setBusy(true);
     try {
       const data = await callApi({
@@ -239,7 +264,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
       });
       setTeams(data.teams);
       setGroupAssignments((prev) => mergeGroupAssignments(prev, data.teams, sheetTitle));
-      setImportingFor(null);
+      closeImportModal();
       if (data.skipped?.length) {
         const names = data.skipped.map((s) => s.name).join(', ');
         toast(`นำเข้าทีมแล้ว (ข้าม ${names} — ซ้ำในชีทนี้อยู่แล้ว)`);
@@ -304,7 +329,7 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
                         type="button"
                         className="icon-btn"
                         title="นำเข้าทั้งทีมจากทีมหลัก"
-                        onClick={() => setImportingFor(team)}
+                        onClick={() => openImportModal(team)}
                       >⇩</button>
                     )}
                     {isAdmin && team.members.length > 0 && (
@@ -433,18 +458,18 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
       )}
 
       {importingFor && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setImportingFor(null); }}>
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) closeImportModal(); }}>
           <div className="modal-box">
             <div className="modal-title">นำเข้าทั้งทีม — {importingFor.name}</div>
             <p className="modal-message">
               เลือกทีมจากหน้าทีมหลัก (Main-War / SUB-WAR) เพื่อคัดลอกสมาชิกทั้ง 5 ช่องมาทับที่นี่
             </p>
             <div className="search-suggestions" style={{ position: 'static', maxHeight: 320, marginBottom: 16 }}>
-              {(importableTeams || []).map((t) => (
+              {(importableTeams || []).filter((t) => !alreadyImportedHere(t)).map((t) => (
                 <div
                   key={`${t.sheet}:${t.teamKey}`}
-                  className="suggestion-item"
-                  onClick={() => doImport(t)}
+                  className={`suggestion-item${selectedImportSource?.sheet === t.sheet && selectedImportSource?.teamKey === t.teamKey ? ' selected' : ''}`}
+                  onClick={() => setSelectedImportSource(t)}
                 >
                   <span>
                     {t.sheet} · {t.name}
@@ -454,7 +479,10 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
               ))}
             </div>
             <div className="modal-actions">
-              <button type="button" className="modal-btn modal-btn-cancel" onClick={() => setImportingFor(null)} disabled={busy}>ยกเลิก</button>
+              <button type="button" className="modal-btn modal-btn-cancel" onClick={closeImportModal} disabled={busy}>ยกเลิก</button>
+              <button type="button" className="modal-btn modal-btn-confirm" onClick={doImport} disabled={busy || !selectedImportSource}>
+                {busy ? 'กำลังนำเข้า...' : 'ยืนยันนำเข้า'}
+              </button>
             </div>
           </div>
         </div>

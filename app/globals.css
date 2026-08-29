@@ -408,6 +408,7 @@ footer { text-align: center; margin-top: 32px; color: var(--text-faint); font-si
 .suggestion-item .gear { font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 .suggestion-item.disabled { cursor: not-allowed; color: var(--text-faint); }
 .suggestion-item.disabled:hover { background: none; }
+.suggestion-item.selected { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); }
 .suggestion-conflict { font-size: 11px; color: var(--text-faint); }
 
 .class-filter-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
