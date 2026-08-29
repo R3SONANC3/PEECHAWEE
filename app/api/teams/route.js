@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readTeams, updateTeamSlot, importTeam } from '@/lib/teams';
+import { readTeams, updateTeamSlot, importTeam, clearTeam } from '@/lib/teams';
 import { readGearMap, applyGearMap, setGear } from '@/lib/gear';
 import { isAdmin } from '@/lib/auth';
 
@@ -22,6 +22,11 @@ export async function POST(request) {
     if (body.action === 'import') {
       const { teams, skipped } = await importTeam(body.sheet, body.teamKey, body.sourceSheet, body.sourceTeamKey);
       return NextResponse.json({ ok: true, teams: applyGearMap(teams, await readGearMap()), skipped });
+    }
+
+    if (body.action === 'clear') {
+      const teams = await clearTeam(body.sheet, body.teamKey);
+      return NextResponse.json({ ok: true, teams: applyGearMap(teams, await readGearMap()) });
     }
 
     await updateTeamSlot(body.sheet, body.teamKey, body.slot, body.name);

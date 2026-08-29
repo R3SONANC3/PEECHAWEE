@@ -204,6 +204,28 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
     }
   }
 
+  async function clearTeamMembers(team) {
+    if (!team.members.length) return;
+    const ok = await confirm({
+      title: 'ล้างสมาชิกทั้งทีม',
+      message: `ต้องการลบสมาชิกทั้งหมดใน ${team.name} (${team.members.length} คน) ใช่หรือไม่? เพื่อใส่รายชื่อใหม่`,
+      confirmText: 'ล้างทีม',
+      danger: true,
+    });
+    if (!ok) return;
+    setBusy(true);
+    try {
+      const data = await callApi({ action: 'clear', sheet: sheetTitle, teamKey: team.key });
+      setTeams(data.teams);
+      setGroupAssignments((prev) => mergeGroupAssignments(prev, data.teams, sheetTitle));
+      toast(`ล้างสมาชิกทีม ${team.name} แล้ว`);
+    } catch (e) {
+      toast('ล้างทีมไม่สำเร็จ: ' + e.message, 'error');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function doImport(sourceTeam) {
     if (!importingFor) return;
     setBusy(true);
@@ -284,6 +306,14 @@ export default function TeamGrid({ sheetTitle, initialTeams, sectionLabels, name
                         title="นำเข้าทั้งทีมจากทีมหลัก"
                         onClick={() => setImportingFor(team)}
                       >⇩</button>
+                    )}
+                    {isAdmin && team.members.length > 0 && (
+                      <button
+                        type="button"
+                        className="icon-btn del"
+                        title="ล้างสมาชิกทั้งทีม"
+                        onClick={() => clearTeamMembers(team)}
+                      >🗑</button>
                     )}
                   </div>
                 </div>
