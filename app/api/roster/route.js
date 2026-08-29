@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readRoster, addMember, deleteMember, editMember } from '@/lib/roster';
 import { readGearMap, setGear, deleteGear } from '@/lib/gear';
+import { removeNameFromAllTeams } from '@/lib/teams';
 import { isAdmin } from '@/lib/auth';
 
 export async function GET() {
@@ -25,20 +26,25 @@ export async function POST(request) {
       }
     } else if (body.action === 'delete') {
       roster = await deleteMember(body.name, body.cls);
-      // Attendance drops the same name automatically on its next load
-      // (syncNamesFromRoster rebuilds its name list from the roster) — GEAR
-      // has no such self-cleaning, so it needs an explicit delete here.
+      // Neither GEAR nor a team-sheet slot self-cleans when a name leaves
+      // the roster — both need an explicit removal here, or the name lingers
+      // forever in the Gear sheet and keeps holding a slot on whichever team
+      // sheet(s) it was assigned to (Main-War/SUB-WAR/Castle/Polarity).
       await deleteGear(body.name);
+      await removeNameFromAllTeams(body.name);
     } else if (body.action === 'edit') {
       roster = await editMember(body.oldName, body.oldCls, body.newName, body.newCls);
       // A blank gear means "unchanged" — never overwrite the shared value with blank.
       if (body.newName && body.gear !== '' && body.gear !== null && body.gear !== undefined) {
         await setGear(body.newName.trim(), body.gear);
       }
-      // A rename leaves the old name's row behind as an orphan otherwise —
-      // nothing looks it up again, but it lingers in the Gear sheet forever.
+      // A rename leaves the old name behind otherwise — an orphan row in
+      // the Gear sheet, and a team slot still showing a name that no longer
+      // exists in the roster. The player (or an admin) re-assigns the new
+      // name to a team slot separately; this only clears the stale one.
       if (body.newName && body.newName.trim() !== body.oldName) {
         await deleteGear(body.oldName);
+        await removeNameFromAllTeams(body.oldName);
       }
     } else {
       return NextResponse.json({ ok: false, error: 'unknown action' }, { status: 400 });
